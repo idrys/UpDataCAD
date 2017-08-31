@@ -10,11 +10,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using HtmlAgilityPack;
+using Newtonsoft.Json;
 
 namespace UpDataCAD
 {
     public partial class Form1 : Form
     {
+        /// <summary>
+        /// Klasa z nazwami w osobnych strumieniach, nazwa rozrzeszenie, ścieżka i pełna nazwa pliku
+        /// </summary>
+        public class FileParts
+        {
+            public string FullPath = string.Empty;
+            public string FullName = string.Empty;
+            public string OnlyName = string.Empty;
+            public string Extention = string.Empty;
+        }
         public Form1()
         {
             InitializeComponent();
@@ -22,29 +33,14 @@ namespace UpDataCAD
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string baseURL = "http://opoczno.eu/uploads/";
-            WebClient client = new WebClient();
-            string content = client.DownloadString(baseURL);
-            WebBrowser w = new WebBrowser();
-            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
 
+            Download d = new Download();
+            MessageBox.Show( "Czy są jakieś pliki do aktualizacji: " + d.IsNewUpdate().ToString());
+            d.DownloadFiles();
             
-
-            //doc = html;
-           // doc.Load(baseURL);
-            doc.Load(client.OpenRead("http://www.opoczno.eu/o-opoczno/#!/dla-architektow-i-inwestorow/"));
-            foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a[@href]") )
-            {
-                //Console.WriteLine(link.Attributes["href"].Value);
-                if(link.Attributes["href"].Value.IndexOf("http://opoczno.eu/uploads/") == 0)
-                MessageBox.Show(link.Attributes["href"].Value);
-            }
-
-            //MessageBox.Show(content);
-
         }
 
-
+       
 
 
         /// <summary>
@@ -72,10 +68,17 @@ namespace UpDataCAD
             return fileEntries;
         }
 
+        /// <summary>
+        /// Metoda wykonywana przed utworzeniem okna dialogowego
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnCreate(object sender, EventArgs e)
         {
             string[] list = ReadListFilesFromRepository("c:\\CADProject\\Repo");
-            MessageBox.Show("");
+            //MessageBox.Show("");
         }
+
+
     }
 }
