@@ -36,7 +36,7 @@ namespace UpDataCAD
 
             Download d = new Download();
             MessageBox.Show( "Czy są jakieś pliki do aktualizacji: " + d.IsNewUpdate().ToString());
-            d.DownloadFiles();
+            //d.DownloadFiles();
             
         }
 

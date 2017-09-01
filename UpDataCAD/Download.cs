@@ -74,11 +74,15 @@ namespace UpDataCAD
             if (localFiles == null)
                 return webFiles;
 
+            //Porównanie lokalnych plików z listą plików umieszczonych na stronie internetowej
             foreach (var localfile in localFiles)
             {               
                 webFiles = webFiles.Where(s => s.FullName == localfile).ToArray();
             }
-                      
+
+            // Odfiltrowanie tylko plików z rozrzeżeniem "*.exe"
+            webFiles = webFiles.Where(s => s.Extention == "exe").ToArray();
+
             return webFiles;
         }
 
@@ -91,7 +95,7 @@ namespace UpDataCAD
             FileParts[] webFiles = GetCurrentPath().ToArray();
             
             webFilesToDownload = Compare(config.LocalFiles, webFiles);
-
+            
             if (webFilesToDownload.Count() == 0)
                 return false;
             else
