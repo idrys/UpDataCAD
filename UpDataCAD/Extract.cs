@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -30,6 +31,56 @@ namespace UpDataCAD
             return targetName;
         }
 
+        /// <summary>
+        /// Wypakowuje wskazany plik do katalogo folderExtract
+        /// </summary>
+        /// <param name="folder">Folder w którym znajduje się archiwum</param>
+        /// <param name="pathFile">pełna ścieżka do spakowanego pliku</param>
+        public bool SevenZipExtractProgress(string pathFile, string folderExtract, Action<int> onProgress)
+        {
+            Regex REX_SevenZipStatus = new Regex(@"(?<p>[0-9]+)%");
+
+            int EverythingOK = -1;
+            string testInfo = string.Empty;
+            string path7zip = "x86\\7z.exe";
+
+            if (Environment.Is64BitOperatingSystem)
+                path7zip = "x64\\7z.exe";
+
+            Process p = new Process();
+            p.StartInfo.FileName = path7zip;
+            p.StartInfo.Arguments = "e " + "\"" + pathFile + "\"" + " -o\"" + folderExtract + "\"" + " -y -bsp1 -bse1 -bso1";
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardOutput = true;
+
+            p.OutputDataReceived += (sender, e) => {
+
+
+
+                if (onProgress != null)
+                {
+                    Match m = REX_SevenZipStatus.Match(e.Data ?? "");
+                    if (m != null && m.Success)
+                    {
+                        int procent = int.Parse(m.Groups["p"].Value);
+                        onProgress(procent);
+                    }
+                }
+            };
+
+            p.Start();
+
+            p.BeginOutputReadLine();
+
+            p.WaitForExit();
+
+
+            p.Close();
+
+            EverythingOK = testInfo.IndexOf("Everything is Ok");
+
+            return EverythingOK == -1 ? false : true;
+        }
 
         /// <summary>
         /// Wypakowuje wskazany plik do katalogo folderExtract
@@ -142,7 +193,7 @@ namespace UpDataCAD
         /// </summary>
         /// <param name="folderName">Ścieżka do folderu w którym znajdują się pliki do rozpakowania</param>
         /// <returns>Zwraca LISTE pełnych ścierzek do wszystkich plików w folderze</returns>
-        static string[] ReadListFilesFromRepository(string folderName)
+        public string[] ReadListFilesFromRepository(string folderName)
         {
 
             string[] fileEntries = null;
@@ -173,9 +224,14 @@ namespace UpDataCAD
             Unpack(zipPath);
 
         }
-
+ 
+        /// <summary>
+        /// Główna metoda programu - rozpakowuje plik i przerzuca do prawidłowego katalogu
+        /// </summary>
+        /// <param name="fileName"></param>
         public void Unpack(string zipPath)
         {
+            // TODO: Przenieść to do pliku konfiguracyjnego
             string extractPath = @"C:\CADProject\CAD Decor Paradyz v. 2.3.0";
 
             //string zipPath = Path.GetFullPath(folderRepo) + fileRepo;
@@ -190,9 +246,40 @@ namespace UpDataCAD
                     if (filesCount == 3)
                         extractPath = extractPath + "\\Plytki\\";
                     else
-                        throw new Exception("Coś poszło nie tak przy rozpakowywaniu plików");
+                        throw new Exception("Coś poszło nie tak przy rozpakowywaniu pliku: " + zipPath);
                 }
                 SevenZipExtract(zipPath, extractPath);
+                //SevenZipExtractor.ExtractToDirectory(folderRepo + fileRepo, extractPath);
+                //ZipFile
+                //File.Delete(folderRepo + fileRepo);
+
+            }
+        }
+
+        /// <summary>
+        /// Główna metoda programu - rozpakowuje plik i przerzuca do prawidłowego katalogu
+        /// </summary>
+        /// <param name="fileName"></param>
+        public void UnpackProgress(string zipPath, Action<int> onProgress)
+        {
+            // TODO: Przenieść to do pliku konfiguracyjnego
+            string extractPath = @"C:\CADProject\CAD Decor Paradyz v. 2.3.0";
+
+            //string zipPath = Path.GetFullPath(folderRepo) + fileRepo;
+            if (File.Exists(zipPath))
+            {
+                int filesCount = this.SevenZipTest(zipPath);
+
+                if (filesCount > 3)
+                    extractPath = extractPath + "\\dodatki\\" + TargetName(zipPath);
+                else
+                {
+                    if (filesCount == 3)
+                        extractPath = extractPath + "\\Plytki\\";
+                    else
+                        throw new Exception("Coś poszło nie tak przy rozpakowywaniu pliku: " + zipPath);
+                }
+                SevenZipExtractProgress(zipPath, extractPath, onProgress);
                 //SevenZipExtractor.ExtractToDirectory(folderRepo + fileRepo, extractPath);
                 //ZipFile
                 //File.Delete(folderRepo + fileRepo);
