@@ -55,8 +55,6 @@ namespace UpDataCAD
 
             p.OutputDataReceived += (sender, e) => {
 
-
-
                 if (onProgress != null)
                 {
                     Match m = REX_SevenZipStatus.Match(e.Data ?? "");
@@ -69,16 +67,10 @@ namespace UpDataCAD
             };
 
             p.Start();
-
             p.BeginOutputReadLine();
-
             p.WaitForExit();
-
-
             p.Close();
-
             EverythingOK = testInfo.IndexOf("Everything is Ok");
-
             return EverythingOK == -1 ? false : true;
         }
 
