@@ -39,6 +39,7 @@ namespace UpDataCAD
         public bool SevenZipExtractProgress(string pathFile, string folderExtract, Action<int> onProgress)
         {
             Regex REX_SevenZipStatus = new Regex(@"(?<p>[0-9]+)%");
+            //ProgressBar progressBar = new ProgressBar();
 
             int EverythingOK = -1;
             string testInfo = string.Empty;
@@ -54,14 +55,19 @@ namespace UpDataCAD
             p.StartInfo.RedirectStandardOutput = true;
 
             p.OutputDataReceived += (sender, e) => {
-
+                
                 if (onProgress != null)
                 {
                     Match m = REX_SevenZipStatus.Match(e.Data ?? "");
                     if (m != null && m.Success)
                     {
+                        
                         int procent = int.Parse(m.Groups["p"].Value);
+                        
+                        //progressBar.Value = procent;
+                        
                         onProgress(procent);
+                        
                     }
                 }
             };
