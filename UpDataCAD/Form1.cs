@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -17,9 +18,7 @@ namespace UpDataCAD
 
     public partial class Form1 : Form
     {
-        static int progress = 0;
         
-        Thread th;
         public Form1()
         {
             InitializeComponent();
@@ -27,77 +26,68 @@ namespace UpDataCAD
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Download d = new Download();
-            //Extract ext = new Extract();
-            this.progressBar1.Minimum = 0;
-            this.progressBar1.Maximum = 100;
+            
+            string repoPath = ConfigurationManager.AppSettings["repo"].ToString();
+            string pathDestFolder = ConfigurationManager.AppSettings["cad"].ToString();
 
-            string pathToFile = @"C:\Users\Slawek\Repo\CAD_Decor_Opoczno_2D_2017-05.exe";
-            string pathToFolder = @"C:\CADProject";
-
-            TestAsyncInvoke t = new TestAsyncInvoke();
-
-            AsyncInvoke method1 = t.Method1;
-            Debug.WriteLine("Wywołanie metody BeginInvoke w wątku {0}", Thread.CurrentThread.ManagedThreadId);
-
-            IAsyncResult asyncResult = method1.BeginInvoke(null, null);
-
-            Debug.WriteLine("Rozpoczęcie odpytywania w wątku {0}", Thread.CurrentThread.ManagedThreadId);
-
-            while (!asyncResult.IsCompleted)
+            Extract extract = new Extract();
+            string [] listFiles = extract.ReadListFilesFromRepository(repoPath);
+            int i = 0;
+            foreach (var file in listFiles)
             {
-                Thread.Sleep(10);
-                Debug.WriteLine("." + t.Progress().ToString());
-                progressBar1.Value = t.Progress();
+                //Debug.WriteLine("Nazwa pliku " + file);
+                //Debug.WriteLine();
+                label1.Text = "Plik " + (++i).ToString() + " z " + listFiles.Count();
+                label1.Refresh();
+                ExtractFile(file, pathDestFolder);
             }
-            progressBar1.Value = 100;
-            Debug.WriteLine("Zakończono odpytywanie wątku {0}", Thread.CurrentThread.ManagedThreadId);
+   
+        }
 
-            try
-            {
+        private void ExtractFile(string pathToFile, string pathToDestFolde)
+        {
+            Download d = new Download();
+            ProgressAsyncInvoke t = new ProgressAsyncInvoke(pathToFile, pathToDestFolde);
+            try { 
+
+                AsyncInvoke method1 = t.ExtractFile;
+                IAsyncResult asyncResult = method1.BeginInvoke(null, null);
+
+                while (!asyncResult.IsCompleted)
+                {
+                    //if (t.Progress() == 0)
+                    Thread.Sleep(100);
+                    if (t.Progress() == 0)
+                    {
+                        label2.Text = "Konfiguruję plik, czekaj ...";
+                        label2.Refresh();
+                        Debug.WriteLine(t.Progress());
+                    }
+                    else
+                    {
+                        label2.Text = "";
+                        label2.Refresh();
+                    }
+                    //Debug.WriteLine(t.Progress());
+                    
+                    progressBar1.Value = t.Progress();
+                }
+                progressBar1.Value = 100; // potrzebne bo czasem 7z pokazuje tylko 95%
+
+                t.Zero();
+          
                 int retVal = method1.EndInvoke(asyncResult);
-                Debug.WriteLine("Zwrócono wartość: " + retVal);
-            } catch(Exception ea)
+            }
+            catch (Exception ea)
             {
+                MessageBox.Show(ea.Message);
                 Debug.WriteLine(ea.ToString());
             }
-
-            //ext.SevenZipExtractProgress(pathToFile, pathToFolder , onProgress);
-            //Debug.WriteLine("Oczekiwanie na zakończenie wątku...");
         }
 
-       
-
-        private void onProgress(int obj)
+        private void Form1_Load(object sender, EventArgs e)
         {
-            progress = obj;
-        }
 
-        public delegate int AsyncInvoke();
-
-        public class TestAsyncInvoke
-        {
-            static int progress = 0;
-            public  int Method1()
-            {
-                Extract ext = new Extract();
-
-                string pathToFile = @"C:\Users\Slawek\Repo\CAD_Decor_Opoczno_2D_2017-05.exe";
-                string pathToFolder = @"C:\CADProject";
-                Debug.WriteLine("Wywołano metodę Method1 w wątku {0} ", Thread.CurrentThread.ManagedThreadId) ;
-                ext.SevenZipExtractProgress(pathToFile, pathToFolder, onProgress);
-                return 5;
-            }
-
-            public int Progress()
-            {
-                return progress;
-            }
-
-            private void onProgress(int obj)
-            {
-                progress = obj;
-            }
         }
     }
 }

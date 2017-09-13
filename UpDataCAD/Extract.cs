@@ -48,34 +48,46 @@ namespace UpDataCAD
             if (Environment.Is64BitOperatingSystem)
                 path7zip = "x64\\7z.exe";
 
+            
+            int filesCount = this.SevenZipTest(pathFile, onProgress);
+
+            if (filesCount > 3)
+                folderExtract = folderExtract + "\\dodatki\\" + TargetName(pathFile);
+            else
+            {
+                if (filesCount == 3)
+                    folderExtract = folderExtract + "\\Plytki\\";
+                else
+                    throw new Exception("Coś poszło nie tak przy rozpakowywaniu pliku: " + pathFile);
+            }
+
             Process p = new Process();
             p.StartInfo.FileName = path7zip;
             p.StartInfo.Arguments = "e " + "\"" + pathFile + "\"" + " -o\"" + folderExtract + "\"" + " -y -bsp1 -bse1 -bso1";
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.UseShellExecute = false;    // Nie zbędne do odczytu wartości z wyjścia 7z
+            p.StartInfo.RedirectStandardOutput = true;  // Nie zbędne do odczytu wartości z wyjścia 7z
 
-            p.OutputDataReceived += (sender, e) => {
+            p.OutputDataReceived += (sender, e) => {    // Odczyt procentów z wyjścia 7z
                 
                 if (onProgress != null)
                 {
                     Match m = REX_SevenZipStatus.Match(e.Data ?? "");
                     if (m != null && m.Success)
-                    {
-                        
+                    {                       
                         int procent = int.Parse(m.Groups["p"].Value);
-                        
-                        //progressBar.Value = procent;
-                        
-                        onProgress(procent);
-                        
+                     
+                        onProgress(procent); // delegat link do metody                        
                     }
                 }
             };
+         
+            p.StartInfo.CreateNoWindow = true; // Ukrycie okna
 
             p.Start();
-            p.BeginOutputReadLine();
+            p.BeginOutputReadLine(); // Nie zbędne do odczytu wartości z wyjścia 7z
             p.WaitForExit();
             p.Close();
+
             EverythingOK = testInfo.IndexOf("Everything is Ok");
             return EverythingOK == -1 ? false : true;
         }
@@ -115,7 +127,7 @@ namespace UpDataCAD
         /// </summary>
         /// <param name="pathFile">Scieżka do archiwum</param>
         /// <returns>Zwraca liczbę spakowanych plików</returns>
-        public int SevenZipTest(string pathFile)
+        public int SevenZipTest(string pathFile, Action<int> onProgress)
         {
             string path7zip = "x86\\7z.exe";
 
@@ -127,6 +139,14 @@ namespace UpDataCAD
             p.StartInfo.Arguments = "t " + "\"" + pathFile + "\"";
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.CreateNoWindow = true; // Ukrycie okna
+            p.OutputDataReceived += (sender, e) => {    // Odczyt procentów z wyjścia 7z
+
+                if (onProgress != null)
+                        onProgress(10); // delegat link do metody                        
+                    
+                }
+            ;
             p.Start();
             string testInfo = p.StandardOutput.ReadToEnd();
             int filesNumber = AnalizeTestOutput(testInfo);
@@ -235,7 +255,8 @@ namespace UpDataCAD
             //string zipPath = Path.GetFullPath(folderRepo) + fileRepo;
             if (File.Exists(zipPath))
             {
-                int filesCount = this.SevenZipTest(zipPath);
+              
+                int filesCount = this.SevenZipTest(zipPath, onProgress);
 
                 if (filesCount > 3)
                     extractPath = extractPath + "\\dodatki\\" + TargetName(zipPath);
@@ -254,19 +275,24 @@ namespace UpDataCAD
             }
         }
 
+        private void onProgress(int obj)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Główna metoda programu - rozpakowuje plik i przerzuca do prawidłowego katalogu
         /// </summary>
         /// <param name="fileName"></param>
-        public void UnpackProgress(string zipPath, Action<int> onProgress)
+        public void UnpackProgress(string zipPath, string pathToCADDecor, Action<int> onProgress)
         {
             // TODO: Przenieść to do pliku konfiguracyjnego
-            string extractPath = @"C:\CADProject\CAD Decor Paradyz v. 2.3.0";
+            string extractPath = pathToCADDecor;
 
             //string zipPath = Path.GetFullPath(folderRepo) + fileRepo;
             if (File.Exists(zipPath))
             {
-                int filesCount = this.SevenZipTest(zipPath);
+                int filesCount = this.SevenZipTest(zipPath, onProgress);
 
                 if (filesCount > 3)
                     extractPath = extractPath + "\\dodatki\\" + TargetName(zipPath);

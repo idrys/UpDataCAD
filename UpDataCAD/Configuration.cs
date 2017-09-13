@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,16 +24,23 @@ namespace UpDataCAD
 
         public Configuration()
         {
-            List<Source> update = new List<Source>();
-            Source tmp = new Source();
-            tmp.Page = "http://www.opoczno.eu/o-opoczno/#!/dla-architektow-i-inwestorow/";
-            tmp.Path = "http://opoczno.eu/uploads/";
-            update.Add(tmp);
+            //string pathToRepo = ConfigurationManager.AppSettings["repo"].ToString();
+            Debug.WriteLine("Konfiguracja:");
 
-            tmp = new Source();
-            tmp.Page = "http://www.cersanit.com.pl/page/dla-architektow-pliki-do-pobrania";
-            tmp.Path = "http://www.cersanit.com.pl/public/";
-            update.Add(tmp);
+          
+
+            List<Source> update = new List<Source>();
+
+            StartupFoldersConfigSection section = (StartupFoldersConfigSection)ConfigurationManager.GetSection("StartupFolders");
+            foreach (FolderElement item in section.FolderItems)
+            {
+                Debug.WriteLine( item.Company );
+                Source tmp = new Source();
+                tmp.Page = item.Web;
+                tmp.Path = item.Path;
+                update.Add(tmp);
+            }
+            
 
             this.Update = update.ToArray<Source>();
 
@@ -38,16 +48,62 @@ namespace UpDataCAD
             this.LocalFiles = localFiles.ToArray<string>();
         }
 
-        private void  ReadConfig()
-        {
-            /*
-            Product product = new Product();
-            product.Name = "Apple";
-            product.Expiry = new DateTime(2008, 12, 28);
-            product.Sizes = new string[] { "Small" };
+       
+    }
 
-            string json = JsonConvert.SerializeObject(product);
-            */
+
+  // Klasy niezbędne do linków stron na których znajdują się bazy CADDecor
+
+    public class StartupFoldersConfigSection : ConfigurationSection
+    {
+        [ConfigurationProperty("Folders")]
+        public FoldersCollection FolderItems
+        {
+            //FoldersCollection t = ((FoldersCollection)(base["Folders"]));
+
+            get { return ((FoldersCollection)(base["Folders"])); }
+        }
+    }
+
+    [ConfigurationCollection(typeof(FolderElement))]
+    public class FoldersCollection : ConfigurationElementCollection
+    {
+        protected override ConfigurationElement CreateNewElement()
+        {
+            return new FolderElement();
+        }
+        protected override object GetElementKey(ConfigurationElement element)
+        {
+            return ((FolderElement)(element)).Company;
+        }
+        public FolderElement this[int idx]
+        {
+            get { return (FolderElement)BaseGet(idx); }
+        }
+    }
+
+    public class FolderElement : ConfigurationElement
+    {
+        [ConfigurationProperty("company", DefaultValue = "", IsKey = true, IsRequired = true)]
+        public string Company
+        {
+            get { return ((string)(base["company"])); }
+            set { base["company"] = value; }
+        }
+
+        [ConfigurationProperty("path", DefaultValue = "", IsKey = false, IsRequired = false)]
+        public string Path
+        {
+            get { return ((string)(base["path"])); }
+            set { base["path"] = value; }
+        }
+
+        [ConfigurationProperty("web", DefaultValue = "", IsKey = false, IsRequired = false)]
+        public string Web
+        {
+            get { return ((string)(base["web"])); }
+            set { base["web"] = value; }
         }
     }
 }
+

@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -11,6 +12,7 @@ namespace UpDataCAD
 {
     public class Download
     {
+        //string t = Properties.Settings.Default.PathToRepo;
         Configuration config = new Configuration();
         FileParts[] webFilesToDownload;
 
