@@ -17,7 +17,7 @@ namespace UpDataCAD
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>Zwraca nazwe docelowego folderu</returns>
-        public  string TargetName(string filePath)
+        public  string TargetName1(string filePath)
         {
             string postfix = @"Plytki\";
 
@@ -49,8 +49,8 @@ namespace UpDataCAD
                 path7zip = "x64\\7z.exe";
 
             
-            int filesCount = this.SevenZipTest(pathFile, onProgress);
-
+            //int filesCount = this.SevenZipTest(pathFile, onProgress);
+            /*
             if (filesCount > 3)
                 folderExtract = folderExtract + "\\dodatki\\" + TargetName(pathFile);
             else
@@ -60,7 +60,7 @@ namespace UpDataCAD
                 else
                     throw new Exception("Coś poszło nie tak przy rozpakowywaniu pliku: " + pathFile);
             }
-
+            */
             Process p = new Process();
             p.StartInfo.FileName = path7zip;
             p.StartInfo.Arguments = "e " + "\"" + pathFile + "\"" + " -o\"" + folderExtract + "\"" + " -y -bsp1 -bse1 -bso1";
@@ -257,7 +257,7 @@ namespace UpDataCAD
             {
               
                 int filesCount = this.SevenZipTest(zipPath, onProgress);
-
+                /*
                 if (filesCount > 3)
                     extractPath = extractPath + "\\dodatki\\" + TargetName(zipPath);
                 else
@@ -267,6 +267,7 @@ namespace UpDataCAD
                     else
                         throw new Exception("Coś poszło nie tak przy rozpakowywaniu pliku: " + zipPath);
                 }
+                */
                 SevenZipExtract(zipPath, extractPath);
                 //SevenZipExtractor.ExtractToDirectory(folderRepo + fileRepo, extractPath);
                 //ZipFile
@@ -293,7 +294,7 @@ namespace UpDataCAD
             if (File.Exists(zipPath))
             {
                 int filesCount = this.SevenZipTest(zipPath, onProgress);
-
+                /*
                 if (filesCount > 3)
                     extractPath = extractPath + "\\dodatki\\" + TargetName(zipPath);
                 else
@@ -303,6 +304,7 @@ namespace UpDataCAD
                     else
                         throw new Exception("Coś poszło nie tak przy rozpakowywaniu pliku: " + zipPath);
                 }
+                */
                 SevenZipExtractProgress(zipPath, extractPath, onProgress);
                 //SevenZipExtractor.ExtractToDirectory(folderRepo + fileRepo, extractPath);
                 //ZipFile

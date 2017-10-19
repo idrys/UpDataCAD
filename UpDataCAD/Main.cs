@@ -1,54 +1,29 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Windows.Forms;
 
 namespace UpDataCAD
 {
     public class SysTrayApp : Form
     {
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        [STAThread]
+        
         public static void Main()
         {
-            IntPtr h = Process.GetCurrentProcess().MainWindowHandle;
-            ShowWindow(h, 0);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            Console.WriteLine("Test");
-            Application.Run(new SysTrayApp());
+            Application.Run(new Form1());
 
         }
 
         private NotifyIcon trayIcon;
         private ContextMenu trayMenu;
 
-        public SysTrayApp()
-        {
-            // Create a simple tray menu with only one item.
-            trayMenu = new ContextMenu();
-
-            trayMenu.MenuItems.Add("Aktualizator internetowy CADDecor", OnUpadateCAD);
-            trayMenu.MenuItems.Add("Aktualizacja z repozytorium", OnRepoUpdate);
-            trayMenu.MenuItems.Add("Okno", Window);
-            trayMenu.MenuItems.Add("Wypakowanie plików", ExtractFiles);
-            trayMenu.MenuItems.Add("Sprawdź czy są nowe aktualizacje", IsUpdate);
-            trayMenu.MenuItems.Add("Exit", OnExit);
-            // Create a tray icon. In this example we use a
-            // standard system icon for simplicity, but you
-            // can of course use your own custom icon too.
-            trayIcon = new NotifyIcon();
-            trayIcon.Text = "MyTrayApp";
-            trayIcon.Icon = new Icon(SystemIcons.Application, 40, 40);
-
-            // Add menu to tray icon and show it.
-            trayIcon.ContextMenu = trayMenu;
-            trayIcon.Visible = true;
-        }
+       
 
         private void ExtractFiles(object sender, EventArgs e)
         {
@@ -68,22 +43,36 @@ namespace UpDataCAD
             Form1 form1 = new Form1();
             form1.Show();
         }
-
+        /*
         private void IsUpdate(object sender, EventArgs e)
         {
             Download d = new Download();
             if (d.IsNewUpdate())
-                MessageBox.Show("Są już dostępne nowe aktualizacje baz danych");
+            {
+               // MessageBox.Show("Są już dostępne nowe aktualizacje baz danych");
+                //d.DownloadFiles();
+            }
             else
                 MessageBox.Show("Brak nowych aktualizacji");
         }
-
+        */
         private void OnRepoUpdate(object sender, EventArgs e)
         {
-            Process p = new Process();
-            p.StartInfo.FileName = "AutoUpdataCaD.exe";
+            try {
+                //Process p = new Process();
+                //p.StartInfo.FileName = "AutoUpdataCaD.exe";
 
-            p.Start();
+                //p.Start();
+                Form1 form1 = new Form1();
+                form1.Show();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+               // Form1 form1 = new Form1();
+               // form1.Show();
+            }
         }
 
         protected override void OnLoad(EventArgs e)
@@ -99,13 +88,17 @@ namespace UpDataCAD
             Application.Exit();
         }
 
-        private void OnUpadateCAD(object sender, EventArgs e)
+        public static SecureString GetSecureString(string str)
         {
-            Process p = new Process();
-            p.StartInfo.FileName = "iUPDATE.EXE";
-
-            p.Start();
+            SecureString secureString = new SecureString();
+            foreach (char ch in str)
+            {
+                secureString.AppendChar(ch);
+            }
+            secureString.MakeReadOnly();
+            return secureString;
         }
+
 
         protected override void Dispose(bool isDisposing)
         {
