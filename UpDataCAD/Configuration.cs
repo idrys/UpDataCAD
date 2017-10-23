@@ -19,22 +19,16 @@ namespace UpDataCAD
         }
 
         public Source[] Update ;
-        //public ArrayList Update ;
         public string[] LocalFiles = null;
 
         public Configuration()
         {
-            //string pathToRepo = ConfigurationManager.AppSettings["repo"].ToString();
-            Debug.WriteLine("Konfiguracja:");
-
-          
-
+            
             List<Source> update = new List<Source>();
 
             StartupFoldersConfigSection section = (StartupFoldersConfigSection)ConfigurationManager.GetSection("StartupFolders");
             foreach (FolderElement item in section.FolderItems)
             {
-                Debug.WriteLine( item.Company );
                 Source tmp = new Source();
                 tmp.Page = item.Web;
                 tmp.Path = item.Path;

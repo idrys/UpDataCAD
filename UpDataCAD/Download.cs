@@ -18,17 +18,29 @@ namespace UpDataCAD
     public class Download
     {
         //string t = Properties.Settings.Default.PathToRepo;
-        Configuration config = new Configuration();
-        FileParts[] webFilesToDownload;
+        //Configuration config = new Configuration();
+        //FileParts[] webFilesToDownload;
+        List<UpdatePath> jsonWeb;
+        List<UpdatePath> jsonLocal;
 
         private string webPathJson = "https://1sw.pl/caddecor/update/path.json";
-        private string localPathJson = @"C:\Users\Admin\Documents\path.json";
+        private string localPathJson;
 
-
+        public Download(string _localPathJson)
+        {
+            localPathJson = _localPathJson + "path.json";
+            if (!File.Exists(localPathJson))
+            {
+                File.Create(localPathJson);
+            }
+        }
+        
+        /*
         public FileParts[] WebFilesToDownload
         {
             get { return webFilesToDownload; }
         }
+        
 
         /// <summary>
         /// Popbierz aktualną ścieżkę do bazy
@@ -54,7 +66,7 @@ namespace UpDataCAD
             }
             return currentPath;
         }
-
+        */
         /// <summary>
         /// Odczytuje pełną ścieżkę i nazwę pliku z aktualizacją bazy danych ze wskazanej strony web
         /// </summary>
@@ -97,7 +109,7 @@ namespace UpDataCAD
             //Porównanie lokalnych plików z listą plików umieszczonych na stronie internetowej
             foreach (var localfile in localFiles)
             {
-                Debug.WriteLine(localfile);
+                //Debug.WriteLine(localfile);
                 webFiles = webFiles.Where(s => s.FullName == localfile).ToArray();
             }
 
@@ -113,6 +125,7 @@ namespace UpDataCAD
             string json = reader.ReadToEnd();
 
             DataSet dataSet = JsonConvert.DeserializeObject<DataSet>(json);
+           
             DataTable dataTable = dataSet.Tables["Table"];
 
             List<UpdatePath> path = new List<UpdatePath>();
@@ -139,41 +152,120 @@ namespace UpDataCAD
 
             WebClient client = new WebClient();
             Stream dataWeb = client.OpenRead(webPathJson);
-            List<UpdatePath> jsonWeb = CreateStructure(dataWeb);
+            jsonWeb = CreateStructure(dataWeb);
 
             Stream dataLocal = (Stream)File.OpenRead(localPathJson);
-            List<UpdatePath> jsonLocal = CreateStructure(dataLocal);
+            jsonLocal = CreateStructure(dataLocal);
 
             
             foreach (var item in jsonLocal)
             {
-                Debug.WriteLine(item.ID);
+                //Debug.WriteLine(item.ID);
                 UpdatePath web = jsonWeb.Find(s => s.ID == item.ID);
                 if (web.Date != item.Date)
                     filesToUpdate.Add(web);
                 
             }
             return filesToUpdate;
-            /*
-            FileParts[] webFiles = GetCurrentPath().ToArray();
-            
-            webFilesToDownload = Compare(config.LocalFiles, webFiles);
-
-            //Debug.WriteLine("Liczba plików do ściągnięcia = " + webFilesToDownload.Length);
-            if (webFilesToDownload.Count() != 0)
-                return true;    
-            else 
-                return false;
-                */
+           
         }
 
+        public void UpdatedJson(string ID, string newDate)
+        {
+            jsonLocal.Find(s => s.ID == ID).Date = newDate;
+
+
+            DataSet dataSet = new DataSet("dataSet");
+            //dataSet.Namespace = "Table";
+            DataTable table = new DataTable();
+            table.TableName = "Table";
+            DataColumn idColumn = new DataColumn("id", typeof(int));
+            idColumn.AutoIncrement = true;
+            
+            DataColumn itemColumn = new DataColumn("item");
+            table.Columns.Add(idColumn);
+            table.Columns.Add(itemColumn);
+            dataSet.Tables.Add(table);
+            
+            for(int i = 0; i < 2; i++)
+            {
+                    DataRow newRow = table.NewRow();
+                    newRow["item"] = "item " + i;
+                    table.Rows.Add(newRow);
+            }
+            
+            dataSet.AcceptChanges();
+            
+            string json = JsonConvert.SerializeObject(dataSet, Formatting.Indented);
+            
+            Debug.WriteLine(json);
+            // {
+            //   "Table": [
+            //     {
+            //       "id": 0,
+            //       "item": "item 0"
+            //     },
+            //     {
+            //       "id": 1,
+            //       "item": "item 1"
+            //     }
+            //   ]
+            // }
+
+            using (StreamWriter file = File.CreateText(localPathJson))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                //serializer.
+                serializer.Serialize(file, jsonLocal.ToArray());
+                string jsonString = JsonConvert.SerializeObject(json, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented });
+            }
+            
+        }
+
+        public void CreateJosnItem(UpdatePath item)
+        {
+            ///TODO
+
+
+            /*
+            StreamReader reader = new StreamReader( Stream.Null );
+            string json = reader.ReadToEnd();
+
+            DataSet dataSet = JsonConvert.DeserializeObject<DataSet>(json);
+            DataTable dataTable = dataSet.Tables["Table"];
+
+            List<UpdatePath> path = new List<UpdatePath>();
+            foreach (DataRow row in dataTable.Rows)
+            {
+                UpdatePath p = new UpdatePath();
+                p.ID = row["ID"].ToString();
+                p.Name = row["Name"].ToString();
+                p.Date = row["Date"].ToString();
+                p.WebPath = row["WebPath"].ToString();
+                p.LocalPath = row["LocalPath"].ToString();
+                path.Add(p);
+            }
+            */
+
+            throw new NotImplementedException("Nie zrobiłem implementacji CreateJosnItem");
+        }
+
+        public void RemoveJsonItem(int ID)
+        {
+            UpdatePath item = jsonLocal.Find(s => s.ID == ID.ToString());
+            jsonLocal.Remove(item);
+            
+        }
+
+
+/*
         public void DownloadFiles()
         {
             //Debug.WriteLine(webFilesToDownload.First().FullName);
             //DownloadFiles(webFilesToDownload);
             DownloadFilesThread(webFilesToDownload);
         }
-
+        
         private void DownloadFilesThread(FileParts[] filesToDownload)
         {
             WebClient client = new WebClient();
@@ -189,7 +281,7 @@ namespace UpDataCAD
                 thread.Start();
             }
         }
-
+        /*
         private void DownloadFiles(FileParts[] filesToDownload)
         {
             WebClient myWebClient = new WebClient();
@@ -197,14 +289,14 @@ namespace UpDataCAD
             foreach (var item in filesToDownload)
             {
                 
-                Debug.WriteLine("Ściągam plik: " + item.FullPath + "; " + item.FullName);
+                //Debug.WriteLine("Ściągam plik: " + item.FullPath + "; " + item.FullName);
                 
                     DowloadLargeFile(item.FullPath, item.FullName);
                    
             }
             
         }
-
+        /*
         private void DowloadLargeFile(string fullpath, string fileName)
         {
             DateTime startTime = DateTime.UtcNow;
@@ -232,6 +324,8 @@ namespace UpDataCAD
                     }
                 }
             }
+            
         }
+        */
     }
 }

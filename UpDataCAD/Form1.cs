@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
@@ -10,49 +11,155 @@ using System.Linq;
 using System.Net;
 using System.Security.Permissions;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace UpDataCAD
 {
-    
+
 
     public partial class Form1 : Form
     {
-       
-        private Download d = new Download();
-        string repoPath = ConfigurationManager.AppSettings["repo"].ToString();
-        string pathDestFolder = ConfigurationManager.AppSettings["cad"].ToString();
+
+        private Download d;
+        string tmpFolder;
+        string pathToCadProject;
+        string tgsCadProjektFolder;
+
+        List<UpdatePath> list_updatePathh;
+        private bool downloadComplete = false;
+        string nameFile = "";
 
         public Form1()
         {
+            // Główny folder programu w, którym będą trzymane pliki konfiguracyjne
+            tgsCadProjektFolder = GetPathToFolder(@"\TGS\CADDecor\");
+
+            //Ustawienie ścieżki TMP, do którego będą ściągane pliki z web
+            tmpFolder = GetPathToFolder(@"\TGS\CADDecor\tmp\");
+
+            // Wszystko co jest związane ze ściąganiem plików
+            d = new Download(tgsCadProjektFolder);
+
+            // Ścieżka do CadProject z plikiem iUPDATE.exe
+            pathToCadProject = GetPathToCadProjekt();
+                      
+            // Sprawdzam czy jest uruchomoiny programicad.exe
+            CheckCadProjektRun();
+
+            // Wczytuję listę dostępnych aktualizacji
+            list_updatePathh = d.IsNewUpdate();
+
             InitializeComponent();
+            
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private string GetPathToFolder(string path)
         {
-            FireDownloadQueue(d.IsNewUpdate());
+            string tmp = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + path;
 
-            Extract extract = new Extract();
-            string [] listFiles = extract.ReadListFilesFromRepository(repoPath);
-            int i = 0;
-            foreach (var file in listFiles)
+            if (!Directory.Exists(tmp))
+                Directory.CreateDirectory(tmp);
+
+            return tmp;
+        }
+       
+        /// <summary>
+        /// Określa ścieżkę do CadProjekt oczytując dane z Regedit
+        /// Jeśli się nie uda uruchamia okno dialogowe z folderami
+        /// </summary>
+        private string GetPathToCadProjekt()
+        {
+            string path = GetPathCADProjektFromRegistry(Registry.CurrentUser);
+
+            if (!File.Exists(path + "\\iUPDATE.exe") || (path.Length == 0))
             {
-                //Debug.WriteLine("Nazwa pliku " + file);
-                //Debug.WriteLine();
-                label1.Text = "Plik " + (++i).ToString() + " z " + listFiles.Count();
-                label1.Refresh();
-                ExtractFile(file, pathDestFolder);
+
+                path = GetPathCADProjektFromRegistry(Registry.LocalMachine);
+
+
+                if (path.Length == 0)
+                    path = FolderBrowserDialog();
+
+                while (!File.Exists(path + "\\iUPDATE.exe"))
+                {
+                    DialogResult result = DialogResult.Retry;
+                    result = MessageBox.Show("Nie wskazano prawidłowej ścieżki do CADDecor. Musi się tam znajdować plik iUPDATE.exe", "Wskaż CADDecor", MessageBoxButtons.RetryCancel);
+                    if (result == DialogResult.Cancel)
+                    {
+                        Debug.WriteLine("Abort");
+                        System.Windows.Forms.Application.Exit();
+                        Environment.Exit(0);
+                    }
+
+                    if (result == DialogResult.Retry)
+                    {
+                        Debug.WriteLine("Retry");
+                        path = FolderBrowserDialog();
+                    }
+
+                }
+
+                RegistryKey key = Registry.CurrentUser;
+                RegistryKey software = key.CreateSubKey(@"SOFTWARE\\CADPROJEKT\INSTALLATIONS\0\");
+                software.SetValue("PATH", path);
             }
-   
+            return path;
+        }
+
+        /// <summary>
+        /// Uruchomienie aktualizacji
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            //FireExtractQueue(list_updatePathh);
+            FireDownloadQueue(list_updatePathh, tmpFolder);
+
+            label2.Text = "Aktualizacja zakończona";
+            //Debug.WriteLine("Aktualizacja zakończona");
+        }      
+     
+        /// <summary>
+        /// Sprawdza czy w tle działa CADDECOR
+        /// </summary>
+        public void CheckCadProjektRun()
+        {
+            string message = "Aby uruchomić aktualizacje musisz zamknąć CADDecor-a";
+            string heading = "Zamknij CADDEcor-a";
+
+            Process[] processeseodsa = Process.GetProcesses();
+            
+
+            DialogResult result = DialogResult.Retry;
+            while (processeseodsa.Any(k => k.ProcessName == "icad.exe"))
+            {
+
+                result = MessageBox.Show(message, heading, MessageBoxButtons.RetryCancel);
+                if (result == DialogResult.Cancel)
+                {
+                    Debug.WriteLine("Abort");
+                    System.Windows.Forms.Application.Exit();
+                    Environment.Exit(0);
+                }
+
+                if (result == DialogResult.Retry)
+                {
+                    Debug.WriteLine("Retry");
+                }
+
+            }
         }
 
         private void ExtractFile(string pathToFile, string pathToDestFolde)
         {
-           // Download d = new Download();
+            // Download d = new Download();
             ProgressAsyncInvoke t = new ProgressAsyncInvoke(pathToFile, pathToDestFolde);
-            try { 
+            try
+            {
 
                 AsyncInvoke method1 = t.ExtractFile;
                 IAsyncResult asyncResult = method1.BeginInvoke(null, null);
@@ -61,12 +168,12 @@ namespace UpDataCAD
                 {
                     //if (t.Progress() == 0)
                     //Thread.Sleep(100);
-                    Application.DoEvents();
+                    //Application.DoEvents();
                     if (t.Progress() == 0)
                     {
                         label2.Text = "Konfiguruję plik, czekaj ...";
                         label2.Refresh();
-                        Debug.WriteLine(t.Progress());
+                        //Debug.WriteLine(t.Progress());
                     }
                     else
                     {
@@ -74,61 +181,57 @@ namespace UpDataCAD
                         label2.Refresh();
                     }
                     //Debug.WriteLine(t.Progress());
-                    
+
                     progressBar1.Value = t.Progress();
                 }
                 progressBar1.Value = 100; // potrzebne bo czasem 7z pokazuje tylko 95%
-
+                
                 t.Zero();
-          
+
                 int retVal = method1.EndInvoke(asyncResult);
             }
             catch (Exception ea)
             {
                 MessageBox.Show(ea.Message);
-                Debug.WriteLine(ea.ToString());
+                //Debug.WriteLine(ea.ToString());
             }
-        }
+        }    
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            
-        }
-
-        
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            
-            
-            FireDownloadQueue( d.IsNewUpdate() );
-        }
-        
-        
-
-        private bool downloadComplete = false;
-
-        private async void FireDownloadQueue(List<UpdatePath> urls)
+        private async void FireDownloadQueue(List<UpdatePath> urls, string tmpF)
         {
             foreach (var url in urls)
             {
-                await Task.Run(() => startDownload(url.WebPath));
+                await Task.Run(() => startDownload(url.WebPath, tmpF));
+                await Task.Run(() => SevenZipExtractProgress(tmpF + "\\" + url.FileName, pathToCadProject + "\\" + url.LocalPath + "\\", onProgres));
+                await Task.Run(() => d.UpdatedJson(url.ID, url.Date));
+            }
+            
+        }
+
+        private async void FireExtractQueue(List<UpdatePath> pathToFiles)
+        {
+            //string repo = "";
+            //string cad = "";
+            //Debug.WriteLine("Rozpakowywanie.");
+            foreach (var pathToFile in pathToFiles)
+            {
+                await Task.Run(() => SevenZipExtractProgress(tmpFolder + "\\" + pathToFile.FileName, pathToCadProject + "\\" + pathToFile.LocalPath, onProgres));
             }
         }
 
-        string nameFile = "";
-
-        private void startDownload(string url)
+        private void startDownload(string url, string repo)
         {
+            Uri u = new Uri(url);
 
+            //Debug.WriteLine("Sciezka do repo: " + @repo + System.IO.Path.GetFileName(u.LocalPath));
             //Thread thread = new Thread(() =>
             //{
-            Uri u = new Uri(url);
+
             nameFile = System.IO.Path.GetFileName(u.LocalPath);
             WebClient client = new WebClient();
             client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
             client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
-            client.DownloadFileAsync(new Uri(url), @repoPath + System.IO.Path.GetFileName(u.LocalPath));
+            client.DownloadFileAsync(new Uri(url), @repo + "\\" + System.IO.Path.GetFileName(u.LocalPath));
 
             // });
             // thread.Start();
@@ -159,14 +262,14 @@ namespace UpDataCAD
 
         void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-
+            string mask = "### ### ### MB";
             this.BeginInvoke((MethodInvoker)delegate
             {
 
                 double bytesIn = double.Parse(e.BytesReceived.ToString());
                 double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
                 double percentage = bytesIn / totalBytes * 100;
-                label2.Text = "Downloaded " + e.BytesReceived + " of " + e.TotalBytesToReceive;
+                label2.Text = "Downloaded " + (e.BytesReceived / 1000).ToString(mask) + " of " + (e.TotalBytesToReceive / 1000).ToString(mask);
                 label1.Text = nameFile;
                 progressBar1.Value = int.Parse(Math.Truncate(percentage).ToString());
             });
@@ -176,7 +279,8 @@ namespace UpDataCAD
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
 
-            this.BeginInvoke((MethodInvoker)delegate {
+            this.BeginInvoke((MethodInvoker)delegate
+            {
                 label2.Text = "Completed";
                 progressBar1.Value = 0;
                 downloadComplete = true;
@@ -184,6 +288,92 @@ namespace UpDataCAD
 
         }
 
+        private void onProgres(int uploaded)
+        {
+            label2.Invoke((MethodInvoker)delegate { label2.Text = "Rozpakowano: " + uploaded.ToString() + "%"; });
+            progressBar1.Invoke((MethodInvoker)delegate { progressBar1.Value = (int)uploaded; });
+        }
+
+        public bool SevenZipExtractProgress(string pathFile, string folderExtract, Action<int> onProgress)
+        {
+            Regex REX_SevenZipStatus = new Regex(@"(?<p>[0-9]+)%");
+
+            int EverythingOK = -1;
+            string testInfo = string.Empty;
+            string path7zip = "x86\\7z.exe";
+
+            if (Environment.Is64BitOperatingSystem)
+                path7zip = "x64\\7z.exe";
+
+            onProgres(0);
+
+            Process p = new Process();
+            p.StartInfo.FileName = path7zip;
+            p.StartInfo.Arguments = "e " + "\"" + pathFile + "\"" + " -o\"" + folderExtract + "\"" + " -y -bsp1 -bse1 -bso1";
+            p.StartInfo.UseShellExecute = false;    // Nie zbędne do odczytu wartości z wyjścia 7z
+            p.StartInfo.RedirectStandardOutput = true;  // Nie zbędne do odczytu wartości z wyjścia 7z
+
+            p.OutputDataReceived += (sender, e) =>
+            {    // Odczyt procentów z wyjścia 7z
+                if (onProgress != null)
+                {
+                    Match m = REX_SevenZipStatus.Match(e.Data ?? "");
+                    if (m != null && m.Success)
+                    {
+                        int procent = int.Parse(m.Groups["p"].Value);
+                        onProgress(procent); // delegat link do metody                        
+                    }
+                }
+            };
+
+            p.StartInfo.CreateNoWindow = true; // Ukrycie okna
+
+            p.Start();
+            p.BeginOutputReadLine(); // Nie zbędne do odczytu wartości z wyjścia 7z
+            p.WaitForExit();
+            onProgres(100);
+            p.Close();
+
+            EverythingOK = testInfo.IndexOf("Everything is Ok");
+            return EverythingOK == -1 ? false : true;
+        }
+
+        private string GetPathCADProjektFromRegistry(RegistryKey key)
+        {
+
+            //RegistryKey key = Registry.LocalMachine;
+            
+            RegistryKey software = key.OpenSubKey(@"SOFTWARE\\CADPROJEKT\INSTALLATIONS\0\", false);
+
+            if (software != null)
+                return software.GetValue("PATH").ToString();
+              
+            return string.Empty;
+
+        }
+
+        private string FolderBrowserDialog()
+        {
+            string path = string.Empty;
+
+                var t = new Thread((ThreadStart)(() =>
+                {
+                    FolderBrowserDialog fbd = new FolderBrowserDialog();
+                    fbd.RootFolder = System.Environment.SpecialFolder.MyComputer;
+                    fbd.ShowNewFolderButton = false;
+                    if (fbd.ShowDialog() == DialogResult.Cancel)
+                        return;
+
+                    path = fbd.SelectedPath;
+                }));
+
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+                t.Join();
+
+            return path;
+        }
     }
 }
+
 
