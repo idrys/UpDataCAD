@@ -20,19 +20,26 @@ namespace UpDataCAD
         //string t = Properties.Settings.Default.PathToRepo;
         //Configuration config = new Configuration();
         //FileParts[] webFilesToDownload;
-        List<UpdatePath> jsonWeb;
-        List<UpdatePath> jsonLocal;
+        Json jsonWeb;
+        Json jsonLocal;
+
+       // List<UpdatePath> jsonWeb;
+       // List<UpdatePath> jsonLocal;
 
         private string webPathJson = "https://1sw.pl/caddecor/update/path.json";
         private string localPathJson;
 
         public Download(string _localPathJson)
         {
+            jsonWeb = new Json();
+            
             localPathJson = _localPathJson + "path.json";
             if (!File.Exists(localPathJson))
             {
                 File.Create(localPathJson);
             }
+
+            jsonLocal = new Json(localPathJson);
         }
         
         /*
@@ -150,8 +157,19 @@ namespace UpDataCAD
         {
             List<UpdatePath> filesToUpdate = new List<UpdatePath>();
 
+            jsonWeb.Read(webPathJson);
+            jsonLocal.Read(localPathJson);
+
+            filesToUpdate = jsonLocal.Compare(jsonWeb.Data);
+
+            /*
+            
+
             WebClient client = new WebClient();
             Stream dataWeb = client.OpenRead(webPathJson);
+            */
+
+            /*
             jsonWeb = CreateStructure(dataWeb);
 
             Stream dataLocal = (Stream)File.OpenRead(localPathJson);
@@ -166,61 +184,19 @@ namespace UpDataCAD
                     filesToUpdate.Add(web);
                 
             }
+            */
+
             return filesToUpdate;
            
         }
 
         public void UpdatedJson(string ID, string newDate)
         {
-            jsonLocal.Find(s => s.ID == ID).Date = newDate;
-
-
-            DataSet dataSet = new DataSet("dataSet");
-            //dataSet.Namespace = "Table";
-            DataTable table = new DataTable();
-            table.TableName = "Table";
-            DataColumn idColumn = new DataColumn("id", typeof(int));
-            idColumn.AutoIncrement = true;
-            
-            DataColumn itemColumn = new DataColumn("item");
-            table.Columns.Add(idColumn);
-            table.Columns.Add(itemColumn);
-            dataSet.Tables.Add(table);
-            
-            for(int i = 0; i < 2; i++)
-            {
-                    DataRow newRow = table.NewRow();
-                    newRow["item"] = "item " + i;
-                    table.Rows.Add(newRow);
-            }
-            
-            dataSet.AcceptChanges();
-            
-            string json = JsonConvert.SerializeObject(dataSet, Formatting.Indented);
-            
-            Debug.WriteLine(json);
-            // {
-            //   "Table": [
-            //     {
-            //       "id": 0,
-            //       "item": "item 0"
-            //     },
-            //     {
-            //       "id": 1,
-            //       "item": "item 1"
-            //     }
-            //   ]
-            // }
-
-            using (StreamWriter file = File.CreateText(localPathJson))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                //serializer.
-                serializer.Serialize(file, jsonLocal.ToArray());
-                string jsonString = JsonConvert.SerializeObject(json, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented });
-            }
+           
             
         }
+
+       
 
         public void CreateJosnItem(UpdatePath item)
         {
@@ -250,12 +226,7 @@ namespace UpDataCAD
             throw new NotImplementedException("Nie zrobiłem implementacji CreateJosnItem");
         }
 
-        public void RemoveJsonItem(int ID)
-        {
-            UpdatePath item = jsonLocal.Find(s => s.ID == ID.ToString());
-            jsonLocal.Remove(item);
-            
-        }
+       
 
 
 /*

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace UpDataCAD
         public string Date;
         public string WebPath;
         public string LocalPath;
+
+        [JsonIgnore]
         public string FileName
         {
             get { return Path.GetFileName(new Uri(WebPath).AbsolutePath); }
