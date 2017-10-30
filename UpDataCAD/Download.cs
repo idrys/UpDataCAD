@@ -160,43 +160,33 @@ namespace UpDataCAD
             jsonWeb.Read(webPathJson);
             jsonLocal.Read(localPathJson);
 
+            jsonLocal.CompareAndRemove(jsonWeb.Data);
+            //jsonLocal.CompareAndAdd(jsonWeb.Data);
+            jsonLocal.Save();
+
             filesToUpdate = jsonLocal.Compare(jsonWeb.Data);
-
-            /*
-            
-
-            WebClient client = new WebClient();
-            Stream dataWeb = client.OpenRead(webPathJson);
-            */
-
-            /*
-            jsonWeb = CreateStructure(dataWeb);
-
-            Stream dataLocal = (Stream)File.OpenRead(localPathJson);
-            jsonLocal = CreateStructure(dataLocal);
-
-            
-            foreach (var item in jsonLocal)
-            {
-                //Debug.WriteLine(item.ID);
-                UpdatePath web = jsonWeb.Find(s => s.ID == item.ID);
-                if (web.Date != item.Date)
-                    filesToUpdate.Add(web);
-                
-            }
-            */
 
             return filesToUpdate;
            
         }
-
+        
         public void UpdatedJson(string ID, string newDate)
         {
-           
-            
+            jsonLocal.UpdateDate(int.Parse(ID), newDate);
+            jsonLocal.Save();           
         }
 
-       
+        public void UpdatedJson(UpdatePath newData)
+        {
+            // Sprawdzam czy newData to zupełnie nowy element czy tylko aktualizacja istniejących danych
+            if (jsonLocal.CompareToAdd(newData).Count == 0)
+                jsonLocal.UpdateDate(newData.LP, newData.Date);
+            else
+                jsonLocal.Add(newData);
+
+            jsonLocal.Save();
+        }
+
 
         public void CreateJosnItem(UpdatePath item)
         {

@@ -21,5 +21,11 @@ namespace UpDataCAD
         {
             get { return Path.GetFileName(new Uri(WebPath).AbsolutePath); }
         }
+
+        [JsonIgnore]
+        public int LP
+        {
+            get { return int.Parse(this.ID); }
+        }
     }
 }

@@ -52,8 +52,15 @@ namespace UpDataCAD
             // Wczytuję listę dostępnych aktualizacji
             list_updatePathh = d.IsNewUpdate();
 
+           
             InitializeComponent();
-            
+            label1.Text = "Sprawdzam ...";
+            if (list_updatePathh.Count == 0)
+            {
+                btnUpdate.Text = "Zamknij";
+                label2.Text = "Nie ma nowych danych do aktualizacji";
+            }
+
         }
 
         private string GetPathToFolder(string path)
@@ -116,11 +123,15 @@ namespace UpDataCAD
         /// <param name="e"></param>
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            //FireExtractQueue(list_updatePathh);
-            FireDownloadQueue(list_updatePathh, tmpFolder);
+            if (list_updatePathh.Count != 0)
+                FireDownloadQueue(list_updatePathh, tmpFolder);
+            else
+            {
+                System.Windows.Forms.Application.Exit();
+            }
 
             label2.Text = "Aktualizacja zakończona";
-            //Debug.WriteLine("Aktualizacja zakończona");
+            
         }      
      
         /// <summary>
@@ -203,9 +214,12 @@ namespace UpDataCAD
             {
                 await Task.Run(() => startDownload(url.WebPath, tmpF));
                 await Task.Run(() => SevenZipExtractProgress(tmpF + "\\" + url.FileName, pathToCadProject + "\\" + url.LocalPath + "\\", onProgres));
-                await Task.Run(() => d.UpdatedJson(url.ID, url.Date));
+                await Task.Run(() => d.UpdatedJson(url));
+                
             }
-            
+
+            btnUpdate.Text = "Zamknij";
+            list_updatePathh = new List<UpdatePath>();
         }
 
         private async void FireExtractQueue(List<UpdatePath> pathToFiles)

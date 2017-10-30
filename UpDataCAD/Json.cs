@@ -59,7 +59,22 @@ namespace UpDataCAD
         }
 
         /// <summary>
-        /// Odczyt danych z pliku i konwersja na json
+        /// Zapisywanie listy json do wskazanego pliku podczas deklarowania klasy
+        /// </summary>
+        public void Save()
+        {
+            if (filePath == string.Empty)
+                throw new Exception("Nie wskazano miejsca zapisu pliku z danymi JSON");
+
+            if(this.jsonData.Count == 0)
+                throw new Exception("Brak danych JSON do zapisu!");
+
+            this.Save(this.jsonData, filePath);
+
+        }
+
+        /// <summary>
+        /// Odczyt danych z pliku lub adresu Url i konwersja na json
         /// </summary>
         /// <param name="path">Ścieżka do pliku</param>
         /// <returns></returns>
@@ -78,7 +93,7 @@ namespace UpDataCAD
         }
 
         /// <summary>
-        /// Odczyt danych z pliku i konwersja na json
+        /// Odczyt danych z strumienia Sream i konwersja na json
         /// </summary>
         /// <param name="path">Ścieżka do pliku</param>
         /// <returns></returns>
@@ -93,6 +108,7 @@ namespace UpDataCAD
 
             path.Close();
 
+            this.jsonData = jsonList;
             return jsonList;
         }
 
@@ -137,7 +153,7 @@ namespace UpDataCAD
         /// <param name="newData">Nowy element</param>
         public void Add(UpdatePath newData)
         {
-            newData.ID = jsonData.Last().ID+1;
+            //newData.ID = jsonData.Last().ID+1; Wywaliłem to bo jeśli najwierw usunę jakiś element a potem dodam nowy to całość się rozjedzie
             jsonData.Add(newData);
         }
 
@@ -150,6 +166,7 @@ namespace UpDataCAD
         {
             List<UpdatePath> differences = new List<UpdatePath>();
 
+            // Sprawdzam czy są jakieś różnice między tymi samymi elementami
             foreach (var item in jsonData)
             {
                 //Debug.WriteLine(item.ID);
@@ -159,8 +176,77 @@ namespace UpDataCAD
 
             }
 
+            //Sprawdzam czy są nowe eleenty
+            foreach (var item in jsonToCheck)
+            {
+                //Debug.WriteLine(item.ID);
+                UpdatePath tmp = this.Data.Find(s => s.ID == item.ID);
+                if (tmp == null)
+                    differences.Add(item);
+            }
+
             return differences;
         }
+
+        /// <summary>
+        /// Porównuje i usuwa elementy, których nie ma w Liście jsonToChack
+        /// </summary>
+        /// <param name="jsonToCheck">Lista elementów, która jest wzorcem</param>
+        public void CompareAndRemove(List<UpdatePath> jsonToCheck)
+        {
+            List<UpdatePath> toRemove = new List<UpdatePath>();
+
+            foreach (var item in jsonData)
+            {
+                
+                UpdatePath tmp = jsonToCheck.Find(s => s.ID == item.ID);
+                if (tmp == null)
+                    toRemove.Add(item);
+            }
+
+            foreach (var item in toRemove)
+            {
+                this.Remove(item.LP);
+            }
+
+        }
+
+        /// <summary>
+        /// Porównuje i usuwa elementy, których nie ma w Liście jsonToChack
+        /// </summary>
+        /// <param name="jsonToCheck">Lista elementów, która jest wzorcem</param>
+        public List<UpdatePath> CompareToAdd(List<UpdatePath> jsonToCheck)
+        {
+            List<UpdatePath> toAdd = new List<UpdatePath>();
+
+            foreach (var item in jsonToCheck)
+            {
+                //Debug.WriteLine(item.ID);
+                UpdatePath tmp = this.Data.Find(s => s.ID == item.ID);
+                if (tmp == null)
+                    toAdd.Add(item);
+            }
+            return toAdd;
+            
+        }
+
+        /// <summary>
+        /// Porównuje i usuwa elementy, których nie ma w Liście jsonToChack
+        /// </summary>
+        /// <param name="jsonToCheck">Lista elementów, która jest wzorcem</param>
+        public List<UpdatePath> CompareToAdd(UpdatePath jsonToCheck)
+        {
+            List<UpdatePath> toAdd = new List<UpdatePath>();
+
+            
+                UpdatePath tmp = this.Data.Find(s => s.ID == jsonToCheck.ID);
+                if (tmp == null)
+                    toAdd.Add(jsonToCheck);
+
+            return toAdd;
+
+        }
+
 
         private List<UpdatePath> ReadLocal(string path)
         {
@@ -170,6 +256,7 @@ namespace UpDataCAD
                 jsonList = Serializer(file);
 
             }
+            this.jsonData = jsonList;
             return jsonList;
         }
 
@@ -183,6 +270,9 @@ namespace UpDataCAD
             {
                 jsonList = Serializer(dataWeb);
             }
+
+            this.jsonData = jsonList;
+
             return jsonList;
         }
 
