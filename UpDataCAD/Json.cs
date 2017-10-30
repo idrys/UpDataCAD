@@ -92,6 +92,11 @@ namespace UpDataCAD
                
         }
 
+        public  List<UpdatePath> Find(int id)
+        {
+            return jsonData.FindAll(s => s.ID == id.ToString());
+        }
+
         /// <summary>
         /// Odczyt danych z strumienia Sream i konwersja na json
         /// </summary>
@@ -124,6 +129,7 @@ namespace UpDataCAD
             item.Name = newData.Name;
             item.Date = newData.Date;
             item.WebPath = newData.WebPath;
+            item.ControllFile = newData.ControllFile;
         }
 
         /// <summary>

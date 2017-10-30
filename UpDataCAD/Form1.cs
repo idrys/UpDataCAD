@@ -31,9 +31,10 @@ namespace UpDataCAD
         List<UpdatePath> list_updatePathh;
         private bool downloadComplete = false;
         string nameFile = "";
-
+        
         public Form1()
         {
+
             // Główny folder programu w, którym będą trzymane pliki konfiguracyjne
             tgsCadProjektFolder = GetPathToFolder(@"\TGS\CADDecor\");
 
@@ -42,9 +43,14 @@ namespace UpDataCAD
 
             // Wszystko co jest związane ze ściąganiem plików
             d = new Download(tgsCadProjektFolder);
+            d.GetWebJson();
+            d.GetLocalJson();
 
             // Ścieżka do CadProject z plikiem iUPDATE.exe
             pathToCadProject = GetPathToCadProjekt();
+
+            //Sprawdzamy zainstalowane aktualizacje
+            CheckLocalFiles(d.JsonWeb, pathToCadProject);
                       
             // Sprawdzam czy jest uruchomoiny programicad.exe
             CheckCadProjektRun();
@@ -61,6 +67,33 @@ namespace UpDataCAD
                 label2.Text = "Nie ma nowych danych do aktualizacji";
             }
 
+        }
+
+        /// <summary>
+        /// Sprawdza daty plików już zainstalowanych w CadDecor i pobiera ich daty ostatnij modyfikacji
+        /// Następnie prowadza do jsonLocal
+        /// </summary>
+        /// <param name="jsonWeb">Dane ze strony Web</param>
+        /// <param name="cadPath">Scieżka do instalacji CADDecor</param>
+        private void CheckLocalFiles(Json jsonWeb, string cadPath)
+        {
+            foreach (var item in jsonWeb.Data)
+            {
+                string path = cadPath + "\\" + item.LocalPath + "\\" + item.ControllFile;
+                if (File.Exists(path))
+                {
+
+                    //TODO: usunąć godzinę z tego wpisu
+                    var date = File.GetLastWriteTime(path);
+
+                    if (d.JsonLocal.Find(item.LP).Count == 1)
+                        d.JsonLocal.UpdateDate(item.LP, date.ToString());
+                    else
+                        d.JsonLocal.Add(item);
+
+                }
+                d.JsonLocal.Save();
+            }
         }
 
         private string GetPathToFolder(string path)

@@ -17,14 +17,18 @@ namespace UpDataCAD
 {
     public class Download
     {
-        //string t = Properties.Settings.Default.PathToRepo;
-        //Configuration config = new Configuration();
-        //FileParts[] webFilesToDownload;
+        
         Json jsonWeb;
         Json jsonLocal;
 
-       // List<UpdatePath> jsonWeb;
-       // List<UpdatePath> jsonLocal;
+        public Json JsonWeb
+        {
+            get { return jsonWeb; }
+        }
+        public Json JsonLocal
+        {
+            get { return jsonLocal; }
+        }
 
         private string webPathJson = "https://1sw.pl/caddecor/update/path.json";
         private string localPathJson;
@@ -41,7 +45,16 @@ namespace UpDataCAD
 
             jsonLocal = new Json(localPathJson);
         }
-        
+
+        public void GetWebJson()
+        {
+            jsonWeb.Read(webPathJson);
+        }
+
+        public void GetLocalJson()
+        {
+            jsonLocal.Read(localPathJson);
+        }
         /*
         public FileParts[] WebFilesToDownload
         {
@@ -157,8 +170,8 @@ namespace UpDataCAD
         {
             List<UpdatePath> filesToUpdate = new List<UpdatePath>();
 
-            jsonWeb.Read(webPathJson);
-            jsonLocal.Read(localPathJson);
+            //jsonWeb.Read(webPathJson);
+            //jsonLocal.Read(localPathJson);
 
             jsonLocal.CompareAndRemove(jsonWeb.Data);
             //jsonLocal.CompareAndAdd(jsonWeb.Data);

@@ -15,6 +15,7 @@ namespace UpDataCAD
         public string Date;
         public string WebPath;
         public string LocalPath;
+        public string ControllFile;
 
         [JsonIgnore]
         public string FileName
