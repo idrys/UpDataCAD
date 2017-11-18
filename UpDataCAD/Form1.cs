@@ -32,7 +32,7 @@ namespace UpDataCAD
         private bool downloadComplete = false;
         string nameFile = "";
         
-        public Form1()
+        public Form1(Who who)
         {
 
             // Główny folder programu w, którym będą trzymane pliki konfiguracyjne
@@ -43,8 +43,16 @@ namespace UpDataCAD
 
             // Wszystko co jest związane ze ściąganiem plików
             d = new Download(tgsCadProjektFolder);
-            d.GetWebJson();
-            d.GetLocalJson();
+
+            //Porównanie dostępnych plików z aktualizacjami z już zainstalowanymi aktualizacjami 
+            try
+            {
+                d.GetWebJson(); // pobiera plik z listą aktualizacji
+            }catch(Exception ex)
+            {
+                MessageBox.Show( ex.Message + ". Problem przy pobieraniu listy z dostępnymi aktualizacjami: path.json");
+            }
+            d.GetLocalJson(); // ładuje lokalną listę aktualizacji
 
             // Ścieżka do CadProject z plikiem iUPDATE.exe
             pathToCadProject = GetPathToCadProjekt();
@@ -60,7 +68,12 @@ namespace UpDataCAD
 
            
             InitializeComponent();
-            label1.Text = "Sprawdzam ...";
+            label1.Text = "Lista plików do aktualizacji:";
+
+            foreach (var item in list_updatePathh)
+                listBox1.Items.Add(item.FileName);
+            
+
             if (list_updatePathh.Count == 0)
             {
                 btnUpdate.Text = "Zamknij";
@@ -248,7 +261,6 @@ namespace UpDataCAD
                 await Task.Run(() => startDownload(url.WebPath, tmpF));
                 await Task.Run(() => SevenZipExtractProgress(tmpF + "\\" + url.FileName, pathToCadProject + "\\" + url.LocalPath + "\\", onProgres));
                 await Task.Run(() => d.UpdatedJson(url));
-                
             }
 
             btnUpdate.Text = "Zamknij";
@@ -339,6 +351,9 @@ namespace UpDataCAD
         {
             label2.Invoke((MethodInvoker)delegate { label2.Text = "Rozpakowano: " + uploaded.ToString() + "%"; });
             progressBar1.Invoke((MethodInvoker)delegate { progressBar1.Value = (int)uploaded; });
+
+            if (uploaded == 100)
+                listBox1.Invoke((MethodInvoker)delegate { listBox1.Items.Remove(listBox1.Items[0]); });
         }
 
         public bool SevenZipExtractProgress(string pathFile, string folderExtract, Action<int> onProgress)

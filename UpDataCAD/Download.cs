@@ -30,9 +30,14 @@ namespace UpDataCAD
             get { return jsonLocal; }
         }
 
-        private string webPathJson = "https://1sw.pl/caddecor/update/path.json";
+        private string webPathJson = "http://1sw.pl/caddecor/update/path.json";
         private string localPathJson;
 
+        /// <summary>
+        /// Konstrutor - sprawdza lokalizację pliku ze ścieżkami plików do aktualizacji
+        /// w razie jego braku tworzy taki plik
+        /// </summary>
+        /// <param name="_localPathJson">Ścieżka do lokalnego pliku ze ścieżkami</param>
         public Download(string _localPathJson)
         {
             jsonWeb = new Json();
@@ -46,15 +51,22 @@ namespace UpDataCAD
             jsonLocal = new Json(localPathJson);
         }
 
+        /// <summary>
+        /// Odczytuje dane plików do ściągnięcia ze strony web
+        /// </summary>
         public void GetWebJson()
         {
             jsonWeb.Read(webPathJson);
         }
 
+        /// <summary>
+        /// Odczytuje dane plików do ściągnięcia z pliku lokalnego
+        /// </summary>
         public void GetLocalJson()
         {
             jsonLocal.Read(localPathJson);
         }
+
         /*
         public FileParts[] WebFilesToDownload
         {
@@ -177,18 +189,27 @@ namespace UpDataCAD
             //jsonLocal.CompareAndAdd(jsonWeb.Data);
             jsonLocal.Save();
 
-            filesToUpdate = jsonLocal.Compare(jsonWeb.Data);
+             filesToUpdate = jsonLocal.Compare(jsonWeb.Data);
 
             return filesToUpdate;
            
         }
         
+        /// <summary>
+        /// Aktualizuje informacje w pliku json
+        /// </summary>
+        /// <param name="ID">id węzła który należy zaktualizować</param>
+        /// <param name="newDate">nowe dane</param>
         public void UpdatedJson(string ID, string newDate)
         {
             jsonLocal.UpdateDate(int.Parse(ID), newDate);
             jsonLocal.Save();           
         }
 
+        /// <summary>
+        /// Aktualizuje informacje w pliku json
+        /// </summary>
+        /// <param name="newData"></param>
         public void UpdatedJson(UpdatePath newData)
         {
             // Sprawdzam czy newData to zupełnie nowy element czy tylko aktualizacja istniejących danych
@@ -199,7 +220,6 @@ namespace UpDataCAD
 
             jsonLocal.Save();
         }
-
 
         public void CreateJosnItem(UpdatePath item)
         {
@@ -228,8 +248,6 @@ namespace UpDataCAD
 
             throw new NotImplementedException("Nie zrobiłem implementacji CreateJosnItem");
         }
-
-       
 
 
 /*

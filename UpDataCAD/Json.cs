@@ -67,7 +67,7 @@ namespace UpDataCAD
                 throw new Exception("Nie wskazano miejsca zapisu pliku z danymi JSON");
 
             if(this.jsonData.Count == 0)
-                throw new Exception("Brak danych JSON do zapisu!");
+                 throw new Exception("Brak danych JSON do zapisu!");
 
             this.Save(this.jsonData, filePath);
 
@@ -271,7 +271,7 @@ namespace UpDataCAD
             List<UpdatePath> jsonList;
 
             WebClient client = new WebClient();
-
+           
             using (Stream dataWeb = client.OpenRead(webPathJson))
             {
                 jsonList = Serializer(dataWeb);

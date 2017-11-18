@@ -16,7 +16,7 @@ namespace UpDataCAD
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new WhoRunApp());
 
         }
 
@@ -40,8 +40,8 @@ namespace UpDataCAD
 
         private void Window(object sender, EventArgs e)
         {
-            Form1 form1 = new Form1();
-            form1.Show();
+           // Form1 form1 = new Form1();
+           // form1.Show();
         }
         /*
         private void IsUpdate(object sender, EventArgs e)
@@ -63,8 +63,8 @@ namespace UpDataCAD
                 //p.StartInfo.FileName = "AutoUpdataCaD.exe";
 
                 //p.Start();
-                Form1 form1 = new Form1();
-                form1.Show();
+                //Form1 form1 = new Form1();
+                //form1.Show();
 
             }
             catch (Exception ex)
