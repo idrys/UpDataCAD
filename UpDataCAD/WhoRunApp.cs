@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -19,6 +21,11 @@ namespace UpDataCAD
         public WhoRunApp()
         {
             InitializeComponent();
+            foreach (var item in LoadJson())
+            {
+                comboBox1.Items.Add(item.department);
+            }
+            
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -54,55 +61,7 @@ namespace UpDataCAD
             System.Windows.Forms.Application.Exit();
         }
 
-        /// ////////////////////////////////////////////////////////////////////////////////////////
-
-        private void textBox1_Validating(object sender,
-                 System.ComponentModel.CancelEventArgs e)
-        {
-            string errorMsg;
-            if (!ValidEmailAddress(tboxEmail.Text, out errorMsg))
-            {
-                // Cancel the event and select the text to be corrected by the user.
-                e.Cancel = true;
-                tboxEmail.Select(0, tboxEmail.Text.Length);
-
-                // Set the ErrorProvider error with the text to display. 
-                this.errorProvider1.SetError(tboxEmail, errorMsg);
-            }
-        }
-
-        private void textBox1_Validated(object sender, System.EventArgs e)
-        {
-            // If all conditions have been met, clear the ErrorProvider of errors.
-            errorProvider1.SetError(tboxEmail, "");
-        }
-        public bool ValidEmailAddress(string emailAddress, out string errorMessage)
-        {
-            // Confirm that the e-mail address string is not empty.
-            if (emailAddress.Length == 0)
-            {
-                errorMessage = "e-mail address is required.";
-                return false;
-            }
-
-            // Confirm that there is an "@" and a "." in the e-mail address, and in the correct order.
-            if (emailAddress.IndexOf("@") > -1)
-            {
-                if (emailAddress.IndexOf(".", emailAddress.IndexOf("@")) > emailAddress.IndexOf("@"))
-                {
-                    errorMessage = "";
-                    return true;
-                }
-            }
-
-            errorMessage = "e-mail address must be valid e-mail address format.\n" +
-               "For example 'someone@example.com' ";
-            return false;
-        }
-
-
-        ///////////////////////////////////////////////////////////////////////////////////////////
-
+       
         bool IsValidEmail(string email)
         {
             try
@@ -175,6 +134,25 @@ namespace UpDataCAD
                 txtBox.BackColor = Color.White;
                 IsValid = false;
             }
+        }
+
+        public List<Item> LoadJson()
+        {
+            List<Item> items;
+            using (StreamReader r = new StreamReader("department.json"))
+            {
+                string json = r.ReadToEnd();
+                items = JsonConvert.DeserializeObject<List<Item>>(json);
+            }
+
+            return items;
+        }
+
+        public class Item
+        {
+            public string department;
+            
+            
         }
     }
 }

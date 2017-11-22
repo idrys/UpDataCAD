@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace UpDataCAD
 {
@@ -270,8 +272,18 @@ namespace UpDataCAD
         {
             List<UpdatePath> jsonList;
 
+            System.Net.ServicePointManager.ServerCertificateValidationCallback += ValidateRemoteCertificate;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+
             WebClient client = new WebClient();
-           
+            try
+            {
+                client.OpenRead(webPathJson);
+            }catch(Exception ex)
+            {
+                string f = ex.Message;
+            }
             using (Stream dataWeb = client.OpenRead(webPathJson))
             {
                 jsonList = Serializer(dataWeb);
@@ -280,6 +292,24 @@ namespace UpDataCAD
             this.jsonData = jsonList;
 
             return jsonList;
+        }
+
+        /// <summary>
+        /// Certificate validation callback.
+        /// </summary>
+        private static bool ValidateRemoteCertificate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors error)
+        {
+            // If the certificate is a valid, signed certificate, return true.
+            if (error == System.Net.Security.SslPolicyErrors.None)
+            {
+                return true;
+            }
+
+            Console.WriteLine("X509Certificate [{0}] Policy Error: '{1}'",
+                cert.Subject,
+                error.ToString());
+
+            return false;
         }
 
         private List<UpdatePath> Serializer(Stream s)

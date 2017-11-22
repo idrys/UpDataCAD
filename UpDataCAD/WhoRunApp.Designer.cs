@@ -115,8 +115,8 @@
             this.tboxEmail.Size = new System.Drawing.Size(94, 20);
             this.tboxEmail.TabIndex = 8;
             this.tboxEmail.Leave += new System.EventHandler(this.tboxEmail_Leave);
-            this.tboxEmail.Validating += new System.ComponentModel.CancelEventHandler(this.textBox1_Validating);
-            this.tboxEmail.Validated += new System.EventHandler(this.textBox1_Validated);
+            //this.tboxEmail.Validating += new System.ComponentModel.CancelEventHandler(this.textBox1_Validating);
+            //this.tboxEmail.Validated += new System.EventHandler(this.textBox1_Validated);
             // 
             // labEmail
             // 

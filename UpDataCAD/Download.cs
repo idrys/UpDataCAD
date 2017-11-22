@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace UpDataCAD
 {
@@ -30,7 +32,7 @@ namespace UpDataCAD
             get { return jsonLocal; }
         }
 
-        private string webPathJson = "http://1sw.pl/caddecor/update/path.json";
+        private string webPathJson = "https://1sw.pl/caddecor/update/path.json";
         private string localPathJson;
 
         /// <summary>
@@ -56,7 +58,13 @@ namespace UpDataCAD
         /// </summary>
         public void GetWebJson()
         {
-            jsonWeb.Read(webPathJson);
+            try
+            {
+                jsonWeb.Read(webPathJson);
+            }catch(Exception ex)
+            {
+                string s = ex.Message;
+            }
         }
 
         /// <summary>
