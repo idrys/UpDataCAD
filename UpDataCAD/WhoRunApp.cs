@@ -3,9 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -18,8 +24,14 @@ namespace UpDataCAD
     {
         Thread tr;
         Who who;
+        string token;
+        string page;
+
         public WhoRunApp()
         {
+            page = "https://1sw.pl";
+            token = ""; 
+
             InitializeComponent();
             foreach (var item in LoadJson())
             {
@@ -28,10 +40,7 @@ namespace UpDataCAD
             
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
+       
 
         private void btnOK_Click(object sender, EventArgs e)
         {
@@ -49,6 +58,7 @@ namespace UpDataCAD
             tr.SetApartmentState(ApartmentState.STA);
             tr.Start();
             //Application.Run(new Form1(who));
+
         }
 
         private void OpenMainWindow()
@@ -60,7 +70,6 @@ namespace UpDataCAD
         {
             System.Windows.Forms.Application.Exit();
         }
-
        
         bool IsValidEmail(string email)
         {
@@ -136,6 +145,10 @@ namespace UpDataCAD
             }
         }
 
+        /// <summary>
+        /// Pobiera listę oddziałów z pliku department.json
+        /// </summary>
+        /// <returns>Zwraca listę oddziałów</returns>
         public List<Item> LoadJson()
         {
             List<Item> items;
@@ -150,9 +163,10 @@ namespace UpDataCAD
 
         public class Item
         {
-            public string department;
-            
-            
+            public string department;        
         }
+
+       
     }
 }
+

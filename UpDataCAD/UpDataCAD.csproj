@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
+    <Compile Include="ConnectServer.cs" />
     <Compile Include="Download.cs" />
     <Compile Include="Extract.cs" />
     <Compile Include="FileParts.cs" />

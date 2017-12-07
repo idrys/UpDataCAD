@@ -15,18 +15,15 @@ namespace UpDataCAD
     {
         string filePath;
         private List<UpdatePath> jsonData;
-
         public List<UpdatePath> Data
         {
             get { return jsonData; }
         }
-
         public Json(string path)
         {
             filePath = path;
             
         }
-
         public Json()
         {
             jsonData = new List<UpdatePath>();
@@ -94,6 +91,11 @@ namespace UpDataCAD
                
         }
 
+        /// <summary>
+        /// Wyszukuje pozycji w liście
+        /// </summary>
+        /// <param name="id">id szukanego elementu</param>
+        /// <returns></returns>
         public  List<UpdatePath> Find(int id)
         {
             return jsonData.FindAll(s => s.ID == id.ToString());
@@ -174,6 +176,16 @@ namespace UpDataCAD
         {
             List<UpdatePath> differences = new List<UpdatePath>();
 
+            // Jeśli jsonData jest pusty ( brak danych ) wtedy przygotowujemy wszystkie pliki do aktualizacji
+            if (jsonData.First().ID == null)
+            {
+                foreach (var item in jsonToCheck)
+                    differences.Add(item);
+                return differences;
+            }
+
+            
+
             // Sprawdzam czy są jakieś różnice między tymi samymi elementami
             foreach (var item in jsonData)
             {
@@ -184,7 +196,7 @@ namespace UpDataCAD
 
             }
 
-            //Sprawdzam czy są nowe eleenty
+            //Sprawdzam czy są nowe elementy
             foreach (var item in jsonToCheck)
             {
                 //Debug.WriteLine(item.ID);
@@ -202,7 +214,11 @@ namespace UpDataCAD
         /// <param name="jsonToCheck">Lista elementów, która jest wzorcem</param>
         public void CompareAndRemove(List<UpdatePath> jsonToCheck)
         {
+            if (jsonData.First().ID == null)
+                return;
+
             List<UpdatePath> toRemove = new List<UpdatePath>();
+           
 
             foreach (var item in jsonData)
             {
@@ -255,7 +271,11 @@ namespace UpDataCAD
 
         }
 
-
+        /// <summary>
+        /// Odczytuje plik ze ścieżki lokalnej, sprawdza i wprowadza do listy
+        /// </summary>
+        /// <param name="path">Ściżka do pliku JSON</param>
+        /// <returns>Lista pozycji z JSON</returns>
         private List<UpdatePath> ReadLocal(string path)
         {
             List<UpdatePath> jsonList;
@@ -268,6 +288,11 @@ namespace UpDataCAD
             return jsonList;
         }
 
+        /// <summary>
+        /// Odczytuje plik ze ścieżki web, sprawdza i wprowadza do listy
+        /// </summary>
+        /// <param name="webPathJson"></param>
+        /// <returns></returns>
         private List<UpdatePath> ReadFromWeb(string webPathJson)
         {
             List<UpdatePath> jsonList;
@@ -312,13 +337,25 @@ namespace UpDataCAD
             return false;
         }
 
-        private List<UpdatePath> Serializer(Stream s)
+        /// <summary>
+        /// Sprawdza podany ciąg pod względem poprawności formatu JSON
+        /// </summary>
+        /// <param name="s">Zwraca warość ciągu JSON w liście</param>
+        /// <returns></returns>
+        public List<UpdatePath> Serializer(Stream s)
         {
             JsonSerializer serializer = new JsonSerializer();
             StreamReader reader = new StreamReader(s);
             string jsonString = reader.ReadToEnd();
             return JsonConvert.DeserializeObject<List<UpdatePath>>(jsonString);
-            // Wyjątek pojawia się prawdopodobnie bo na stronie plik json ma ciągle wpisane "Table"
+            
+        }
+
+        public void Serializer(string jsonString)
+        {
+            JsonSerializer serializer = new JsonSerializer();            
+            var jsonData = JsonConvert.DeserializeObject<Who>(jsonString);
+            
         }
     }
 }

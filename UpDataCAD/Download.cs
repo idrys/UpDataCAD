@@ -32,7 +32,7 @@ namespace UpDataCAD
             get { return jsonLocal; }
         }
 
-        private string webPathJson = "https://1sw.pl/caddecor/update/path.json";
+        private string webPathJson = "https://1sw.pl/caddecor/path.json";
         private string localPathJson;
 
         /// <summary>
@@ -47,9 +47,12 @@ namespace UpDataCAD
             localPathJson = _localPathJson + "path.json";
             if (!File.Exists(localPathJson))
             {
-                File.Create(localPathJson);
+                File.Create(localPathJson).Close();
+                File.WriteAllText(localPathJson, "[{}]");
+                
+                
             }
-
+            
             jsonLocal = new Json(localPathJson);
         }
 

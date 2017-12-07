@@ -31,42 +31,58 @@ namespace UpDataCAD
         List<UpdatePath> list_updatePathh;
         private bool downloadComplete = false;
         string nameFile = "";
-        
-        public Form1(Who who)
+
+        Who who;
+        ConnectServer cs;
+
+        public Form1(Who _who)
         {
+            who = _who;
+            cs = new ConnectServer("https://1sw.pl/");
+
+            MessageBox.Show(who.department);
+            string tgsCADPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\TGS\CADDecor\";
 
             // Główny folder programu w, którym będą trzymane pliki konfiguracyjne
-            tgsCadProjektFolder = GetPathToFolder(@"\TGS\CADDecor\");
+            tgsCadProjektFolder = GetOrCreatePathToFolder(tgsCADPath);
 
             //Ustawienie ścieżki TMP, do którego będą ściągane pliki z web
-            tmpFolder = GetPathToFolder(@"\TGS\CADDecor\tmp\");
-
+            tmpFolder = GetOrCreatePathToFolder(tgsCADPath + @"\tmp\");
+           
             // Wszystko co jest związane ze ściąganiem plików
             d = new Download(tgsCadProjektFolder);
-
+            
             //Porównanie dostępnych plików z aktualizacjami z już zainstalowanymi aktualizacjami 
             try
             {
                 d.GetWebJson(); // pobiera plik z listą aktualizacji
-            }catch(Exception ex)
+                
+            }
+            catch(Exception ex)
             {
                 MessageBox.Show( ex.Message + ". Problem przy pobieraniu listy z dostępnymi aktualizacjami: path.json");
             }
             d.GetLocalJson(); // ładuje lokalną listę aktualizacji
 
-            // Ścieżka do CadProject z plikiem iUPDATE.exe
-            pathToCadProject = GetPathToCadProjekt();
+            try
+            {
+                // Ścieżka do CadProject z plikiem iUPDATE.exe
+                pathToCadProject = GetPathToCadProjekt();
+               
+                //Sprawdzamy zainstalowane aktualizacje
+                CheckLocalFiles(d.JsonWeb, pathToCadProject);
+                
+                // Sprawdzam czy jest uruchomoiny programicad.exe
+                CheckCadProjektRun();
 
-            //Sprawdzamy zainstalowane aktualizacje
-            CheckLocalFiles(d.JsonWeb, pathToCadProject);
-                      
-            // Sprawdzam czy jest uruchomoiny programicad.exe
-            CheckCadProjektRun();
+                // Wczytuję listę dostępnych aktualizacji
+                list_updatePathh = d.IsNewUpdate();
+            }catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
 
-            // Wczytuję listę dostępnych aktualizacji
-            list_updatePathh = d.IsNewUpdate();
-
-           
             InitializeComponent();
             label1.Text = "Lista plików do aktualizacji:";
 
@@ -82,6 +98,8 @@ namespace UpDataCAD
 
         }
 
+        
+
         /// <summary>
         /// Sprawdza daty plików już zainstalowanych w CadDecor i pobiera ich daty ostatnij modyfikacji
         /// Następnie prowadza do jsonLocal
@@ -90,6 +108,13 @@ namespace UpDataCAD
         /// <param name="cadPath">Scieżka do instalacji CADDecor</param>
         private void CheckLocalFiles(Json jsonWeb, string cadPath)
         {
+            if (jsonWeb == null)
+                throw new Exception("Funkcja CheckLocalFiles nie ma wartości jsonWeb! ");
+            if (cadPath == string.Empty )
+                throw new Exception("Funkcja CheckLocalFiles nie ma wartości cadPath! ");
+            if (d.JsonLocal == null)
+                throw new Exception("Brak d.JsonLocal");
+
             foreach (var item in jsonWeb.Data)
             {
                 string path = cadPath + "\\" + item.LocalPath + "\\" + item.ControllFile;
@@ -107,16 +132,22 @@ namespace UpDataCAD
                 }
                 d.JsonLocal.Save();
             }
+            
         }
 
-        private string GetPathToFolder(string path)
+        /// <summary>
+        /// Sprawdza czy istnieje wskazany foldej, jeśli nie to go tworzy
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private string GetOrCreatePathToFolder(string path)
         {
-            string tmp = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + path;
+            //string tmp = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + path;
 
-            if (!Directory.Exists(tmp))
-                Directory.CreateDirectory(tmp);
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
 
-            return tmp;
+            return path;
         }
        
         /// <summary>
@@ -211,6 +242,11 @@ namespace UpDataCAD
             }
         }
 
+        /// <summary>
+        /// Rozpakowywanie plików
+        /// </summary>
+        /// <param name="pathToFile">ścieżka do pliku</param>
+        /// <param name="pathToDestFolde">gdzie go rozpakować</param>
         private void ExtractFile(string pathToFile, string pathToDestFolde)
         {
             // Download d = new Download();
@@ -254,17 +290,40 @@ namespace UpDataCAD
             }
         }    
 
+        /// <summary>
+        /// Wątki, które nalerzy pokoleii uruchamiać
+        /// </summary>
+        /// <param name="urls"></param>
+        /// <param name="tmpF"></param>
         private async void FireDownloadQueue(List<UpdatePath> urls, string tmpF)
         {
             foreach (var url in urls)
             {
+                await Task.Run(() => who.start = DateTime.Now );
+                // Ściąganie pliku
                 await Task.Run(() => startDownload(url.WebPath, tmpF));
+
+                // Rozpakowanie pliku
                 await Task.Run(() => SevenZipExtractProgress(tmpF + "\\" + url.FileName, pathToCadProject + "\\" + url.LocalPath + "\\", onProgres));
+
+                // Aktualizacja lokalnego pliku json z informacjami o aktualizacjach
                 await Task.Run(() => d.UpdatedJson(url));
+
+                //TODO: Wsłanie na serwer info o udanej aktualizacji
+                await Task.Run(() => who.file = url.FileName);
+                await Task.Run(() => who.end = DateTime.Now);
+                await Task.Run(() => SendInfo(who));
             }
 
             btnUpdate.Text = "Zamknij";
             list_updatePathh = new List<UpdatePath>();
+        }
+
+        private void SendInfo(Who who)
+        {
+
+            cs.SendInformation(who.ToString());
+            //throw new NotImplementedException();
         }
 
         private async void FireExtractQueue(List<UpdatePath> pathToFiles)

@@ -22,13 +22,13 @@ namespace UpDataCAD
 
         }
 
-    /// <summary>
+        /// <summary>
     /// Wypakowanie wskazanego pliku do określonego folderu
     /// </summary>
     /// <param name="pathToFile">Zarchiwizowany plik do rozpakowania </param>
     /// <param name="pathDestFolder">Miejsce wypakowania plików</param>
     /// <returns></returns>
-    public int ExtractFile()
+        public int ExtractFile()
         {
             Extract ext = new Extract();
             Debug.WriteLine(this.pathToFile + "; " + this.pathDestFolder );
