@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,7 +16,7 @@ namespace UpDataCAD
 {
     public class ConnectServer
     {
-        string token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImVmYzFjOTc0NmI1ZWIwODljYTA1NDM2ZWNlN2QxZWE0MDNiMDFmNTIyZmJkYzYzY2U4OWU5YjEyNzFmYTdhNWViNDdmNTRmZjBiOTQ1ZGU3In0.eyJhdWQiOiIzIiwianRpIjoiZWZjMWM5NzQ2YjVlYjA4OWNhMDU0MzZlY2U3ZDFlYTQwM2IwMWY1MjJmYmRjNjNjZTg5ZTliMTI3MWZhN2E1ZWI0N2Y1NGZmMGI5NDVkZTciLCJpYXQiOjE1MTc4MjUzODgsIm5iZiI6MTUxNzgyNTM4OCwiZXhwIjoxNTQ5MzYxMzg4LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.lnvquBEGB0g3-82ztA1iT4GthlXOyO5zX3qiW7iDT6D1cM15_Zn6slk1UOcHR1tsC406Px45eXvTZUjl3lW74Ynt11lCm7isygO-aQNweBA_Oyw_3ArcyjSvWmtEaYVVqAhivnNnJySJGMaUSVxNirPCTjagtcL31LIBR18IsUp9828-XvqGPwMk8jf0I2JHTPwVzCpeuFqQpvatkrJ_zJ4qPrvsWqMrX5tkPhuV9MhUKouiNLkbikbrjqC-43Inzs5nhoMhY2dssBj9rhfQUUyDip15-eWHNCFk_1SoSLl_lwa5R3gPMundtFdCMD_q4OdCrj5xzYt2gnsrh554tV-M3aYcqcphko6iQd_sq8d1Q4916iIn9tVa9IfWxSicyNCEglgJCaaZ9zrmeLeaSoqbhFjNpmQ_-3xlZUYY7nKhKET6_3PTulNgb7eeFHIi6Qe3bxJKDFZuSQ6CH3oZJcHNrX1XcQVOoqLthWqSBWRdbxLleVPjEMPnWBj7Y9CXDO_Dr8AcIrkrTl2-hjzrhFMfxjnxOinEMnXooMqucyTFt3BC1REyeUyvuJJudwUdHOqxPDJXVTEQo7G4J_tB5HwCt6moenCi8HG8TtsTnQUY477b_QjosQYZ2HJyG9RPBcmoxySaEj0YO5Hh8-mRI1BIRfrs21MIWjmnCscH5_c";
+        string token = File.ReadAllText("ta.txt");
         string page;
         public ConnectServer(string _address)
         {
