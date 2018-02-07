@@ -40,7 +40,7 @@ namespace UpDataCAD
             who = _who;
             cs = new ConnectServer("https://1sw.pl/");
 
-            MessageBox.Show(who.department);
+            //MessageBox.Show(who.department);
             string tgsCADPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\TGS\CADDecor\";
 
             // Główny folder programu w, którym będą trzymane pliki konfiguracyjne
@@ -66,11 +66,11 @@ namespace UpDataCAD
 
             try
             {
-                // Ścieżka do CadProject z plikiem iUPDATE.exe
+                // Ścieżka do CadProject ( sciezke okreslam szukajac pliku iUPDATE.exe )
                 pathToCadProject = GetPathToCadProjekt();
                
-                //Sprawdzamy zainstalowane aktualizacje
-                CheckLocalFiles(d.JsonWeb, pathToCadProject);
+                //TODO: Sprawdzamy zainstalowane aktualizacje
+                //TODO: CheckLocalFiles(d.JsonWeb, pathToCadProject);
                 
                 // Sprawdzam czy jest uruchomoiny programicad.exe
                 CheckCadProjektRun();
@@ -87,7 +87,7 @@ namespace UpDataCAD
             label1.Text = "Lista plików do aktualizacji:";
 
             foreach (var item in list_updatePathh)
-                listBox1.Items.Add(item.FileName);
+                listBox1.Items.Add(item.FullName);
             
 
             if (list_updatePathh.Count == 0)
@@ -193,6 +193,14 @@ namespace UpDataCAD
             return path;
         }
 
+        private string DateTimeMySqlFormat(DateTime dt)
+        {
+            
+            string str = dt.ToString("yyyy-MM-dd H:mm:ss");
+
+            return str;
+        }
+
         /// <summary>
         /// Uruchomienie aktualizacji
         /// </summary>
@@ -200,13 +208,25 @@ namespace UpDataCAD
         /// <param name="e"></param>
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (list_updatePathh.Count != 0)
-                FireDownloadQueue(list_updatePathh, tmpFolder);
-            else
-            {
-                System.Windows.Forms.Application.Exit();
-            }
+            //who.start = DateTimeMySqlFormat( DateTime.Now );
+            //who.file = "filnametest.zip";
+            //who.end = DateTimeMySqlFormat (DateTime.Now );
+            //cs.SendInformation(who.ToString());
 
+            //  SendInfo(who);
+            try
+            {
+                if (list_updatePathh.Count != 0)
+                    FireDownloadQueue(list_updatePathh, tmpFolder);
+                else
+                {
+                    System.Windows.Forms.Application.Exit();
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
             label2.Text = "Aktualizacja zakończona";
             
         }      
@@ -299,9 +319,9 @@ namespace UpDataCAD
         {
             foreach (var url in urls)
             {
-                await Task.Run(() => who.start = DateTime.Now );
+                await Task.Run(() => who.start = DateTimeMySqlFormat( DateTime.Now ) );
                 // Ściąganie pliku
-                await Task.Run(() => startDownload(url.WebPath, tmpF));
+                await Task.Run(() => startDownload(url.Path, tmpF));
 
                 // Rozpakowanie pliku
                 await Task.Run(() => SevenZipExtractProgress(tmpF + "\\" + url.FileName, pathToCadProject + "\\" + url.LocalPath + "\\", onProgres));
@@ -309,9 +329,9 @@ namespace UpDataCAD
                 // Aktualizacja lokalnego pliku json z informacjami o aktualizacjach
                 await Task.Run(() => d.UpdatedJson(url));
 
-                //TODO: Wsłanie na serwer info o udanej aktualizacji
+                //TODO: Wysłanie na serwer info o udanej aktualizacji
                 await Task.Run(() => who.file = url.FileName);
-                await Task.Run(() => who.end = DateTime.Now);
+                await Task.Run(() => who.end = DateTimeMySqlFormat( DateTime.Now ));
                 await Task.Run(() => SendInfo(who));
             }
 
@@ -411,7 +431,7 @@ namespace UpDataCAD
             label2.Invoke((MethodInvoker)delegate { label2.Text = "Rozpakowano: " + uploaded.ToString() + "%"; });
             progressBar1.Invoke((MethodInvoker)delegate { progressBar1.Value = (int)uploaded; });
 
-            if (uploaded == 100)
+            if (uploaded == 100 && listBox1.Items.Count > 0)
                 listBox1.Invoke((MethodInvoker)delegate { listBox1.Items.Remove(listBox1.Items[0]); });
         }
 
@@ -493,6 +513,19 @@ namespace UpDataCAD
                 t.Join();
 
             return path;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+           // who.start = DateTime.Now;
+           // who.file = "filnametest.zip";
+            //who.end = DateTime.Now;
+            //SendInfo(who);
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            System.Windows.Forms.Application.Exit();
         }
     }
 }

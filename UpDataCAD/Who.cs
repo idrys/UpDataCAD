@@ -20,27 +20,27 @@ namespace UpDataCAD
         public string email;
         public string file;
         public string department;
-        public DateTime start;
-        public DateTime end;
+        public string start;
+        public string end;
         
 
         override public string ToString()
         {
             string tmp = string.Empty;
 
-            tmp = "desktop: '" + desktop + "', " +
-                  "name: '" + name + "', " +
-                  "lastnem: '" + lastname + "', " +
-                  "phone: '" + phone + "', " +
-                  "email: '" + email + "', " +
-                  "file: '" + file + "', " +
-                  "department: '" + department + "', " +
-                  "start: '" + start + "', " +
-                  "end: '" + end + "'";
+            tmp = "'desktop': '" + desktop + "', " +
+                  "'name': '" + name + "', " +
+                  "'lastname': '" + lastname + "', " +
+                  "'phone': '" + phone + "', " +
+                  "'email': '" + email + "', " +
+                  "'messages': '" + file + "', " +
+                  "'department': '" + department + "', " +
+                  "'start': '" + start + "', " +
+                  "'end': '" + end + "'";
 
 
             return tmp;
-        }
+         }
     }
        
 }

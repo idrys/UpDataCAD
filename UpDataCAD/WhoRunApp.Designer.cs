@@ -53,7 +53,6 @@
             this.label1.Size = new System.Drawing.Size(44, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Oddział";
-            
             // 
             // comboBox1
             // 
@@ -62,6 +61,7 @@
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(200, 21);
             this.comboBox1.TabIndex = 1;
+            this.comboBox1.Leave += new System.EventHandler(this.VaildateDepartment);
             // 
             // label2
             // 
@@ -86,7 +86,7 @@
             this.tboxName.Location = new System.Drawing.Point(45, 112);
             this.tboxName.Name = "tboxName";
             this.tboxName.Size = new System.Drawing.Size(100, 20);
-            this.tboxName.TabIndex = 4;
+            this.tboxName.TabIndex = 2;
             this.tboxName.Leave += new System.EventHandler(this.tboxName_Leave);
             this.tboxName.Validated += new System.EventHandler(this.ValidateText);
             // 
@@ -95,7 +95,7 @@
             this.tboxLastName.Location = new System.Drawing.Point(145, 112);
             this.tboxLastName.Name = "tboxLastName";
             this.tboxLastName.Size = new System.Drawing.Size(100, 20);
-            this.tboxLastName.TabIndex = 5;
+            this.tboxLastName.TabIndex = 3;
             this.tboxLastName.Leave += new System.EventHandler(this.tboxLastName_Leave);
             this.tboxLastName.Validated += new System.EventHandler(this.ValidateText);
             // 
@@ -113,10 +113,8 @@
             this.tboxEmail.Location = new System.Drawing.Point(151, 170);
             this.tboxEmail.Name = "tboxEmail";
             this.tboxEmail.Size = new System.Drawing.Size(94, 20);
-            this.tboxEmail.TabIndex = 8;
+            this.tboxEmail.TabIndex = 5;
             this.tboxEmail.Leave += new System.EventHandler(this.tboxEmail_Leave);
-            //this.tboxEmail.Validating += new System.ComponentModel.CancelEventHandler(this.textBox1_Validating);
-            //this.tboxEmail.Validated += new System.EventHandler(this.textBox1_Validated);
             // 
             // labEmail
             // 
@@ -132,7 +130,7 @@
             this.btnOK.Location = new System.Drawing.Point(170, 240);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
-            this.btnOK.TabIndex = 10;
+            this.btnOK.TabIndex = 7;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
@@ -142,7 +140,7 @@
             this.btnCancel.Location = new System.Drawing.Point(45, 240);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 11;
+            this.btnCancel.TabIndex = 6;
             this.btnCancel.Text = "Anuluj";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -153,7 +151,8 @@
             this.maskTBoxPhone.Mask = "+48 000 000 000";
             this.maskTBoxPhone.Name = "maskTBoxPhone";
             this.maskTBoxPhone.Size = new System.Drawing.Size(100, 20);
-            this.maskTBoxPhone.TabIndex = 12;
+            this.maskTBoxPhone.TabIndex = 4;
+            this.maskTBoxPhone.Leave += new System.EventHandler(this.ValidatePhone);
             // 
             // errorProvider1
             // 
@@ -177,7 +176,8 @@
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.label1);
             this.Name = "WhoRunApp";
-            this.Text = "Uruchamia aplikacje: ";
+            this.Text = "Kto uruchamia:";
+            this.Load += new System.EventHandler(this.WhoRunApp_Load);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

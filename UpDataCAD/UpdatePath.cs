@@ -12,7 +12,10 @@ namespace UpDataCAD
     {
         public string ID;
         public string Name;
-        public string Date;
+        public string FullName;
+        public string WebSide;
+        public string Path;
+        public string Update_at;
         public string WebPath;
         public string LocalPath;
         public string ControllFile;
@@ -20,7 +23,11 @@ namespace UpDataCAD
         [JsonIgnore]
         public string FileName
         {
-            get { return Path.GetFileName(new Uri(WebPath).AbsolutePath); }
+            get {
+                var t = new Uri(Path).AbsolutePath;
+                var g = System.IO.Path.GetFileName(t);
+                return g;
+            }
         }
 
         [JsonIgnore]

@@ -16,8 +16,8 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
 namespace UpDataCAD
-{
-    public class Download
+{ 
+     public class Download
     {
         
         Json jsonWeb;
@@ -32,7 +32,7 @@ namespace UpDataCAD
             get { return jsonLocal; }
         }
 
-        private string webPathJson = "https://1sw.pl/caddecor/path.json";
+        private string webPathJson = "https://1sw.pl/caddecor/json";
         private string localPathJson;
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace UpDataCAD
                 UpdatePath p = new UpdatePath();
                 p.ID = row["ID"].ToString();
                 p.Name = row["Name"].ToString();
-                p.Date = row["Date"].ToString();
+                p.Update_at = row["Date"].ToString();
                 p.WebPath = row["WebPath"].ToString();
                 p.LocalPath = row["LocalPath"].ToString();
                 path.Add(p);
@@ -225,7 +225,7 @@ namespace UpDataCAD
         {
             // Sprawdzam czy newData to zupełnie nowy element czy tylko aktualizacja istniejących danych
             if (jsonLocal.CompareToAdd(newData).Count == 0)
-                jsonLocal.UpdateDate(newData.LP, newData.Date);
+                jsonLocal.UpdateDate(newData.LP, newData.Update_at);
             else
                 jsonLocal.Add(newData);
 

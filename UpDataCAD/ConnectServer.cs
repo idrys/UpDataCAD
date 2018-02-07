@@ -15,7 +15,7 @@ namespace UpDataCAD
 {
     public class ConnectServer
     {
-        string token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjNmYzIyNzBlODViOTU5NjhiNjJlZWI1NDJjNTliMTZjNDQ4MjYyMmM4NzllMTRjOGIzN2RjOGRmMWUwZTMwZGI3NmMyMWQwNDVlMTllYTJhIn0.eyJhdWQiOiIzIiwianRpIjoiM2ZjMjI3MGU4NWI5NTk2OGI2MmVlYjU0MmM1OWIxNmM0NDgyNjIyYzg3OWUxNGM4YjM3ZGM4ZGYxZTBlMzBkYjc2YzIxZDA0NWUxOWVhMmEiLCJpYXQiOjE1MTIzOTkzODEsIm5iZiI6MTUxMjM5OTM4MSwiZXhwIjoxNTQzOTM1MzgxLCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.pWTvSqcicdlEpuw2m-mQTLlRctvRh0u9hQ4GBGDKtf9NY0Mz6ad0Y31VIcCwUp_9-Ji8OOLA5r08C9tPo5Q17LTvLG6ctyXkucgjTVDOnam2-WxYazDkXWFKZ9Nq4e13H8KJ6ltRzYlLvzS2fXT9VxeYW5KAObEMYeIRhAS_LxjFc74curjzp82hJQ0k7sG0GPl-ex37gp_r-W9N8ZbjuJ4yixbg0iDlI1SZBaPca51edLj3OZUqlV6L69hBqJsVpJB97cwQCIutcFb_y0l6upfDIlNHwwKOeSlzfTEr0i7q1f6uWYB4_9g7tjJWlXTQnGilTJEThxkGWevWXgO2ZoDwnko4Aa370HwZAIj7VxW_YI3lwj6XlQuNqIfA3Z6gnDd-H8JNRL0Qc3elT28SOPuzU_RUE4JeT49sE2kzbtgDNl3SP9-Z5mNHYBve2gIDyTFLKhtc5R6zgVeGUisEt3UVrfSWywG2i7nJcd8Hhory9GtjbkMnLUnbsElY2hZUyDtxt9CjVC7CuQbrOPv-GIbXg2P9dGLkUEGkODMTYtJvP6MJvEnlh8Qx-AIny-FfTXvMb7PWoZYLybgJ94mYV5izSjG7feo4ZwgdPfFv42LKHqjkRYUI3KJuhjDiZHIJD3gFu2wfP8jg-pQeyoyOKKssPokffSGs-0RkWR5Pdnc";
+        string token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImVmYzFjOTc0NmI1ZWIwODljYTA1NDM2ZWNlN2QxZWE0MDNiMDFmNTIyZmJkYzYzY2U4OWU5YjEyNzFmYTdhNWViNDdmNTRmZjBiOTQ1ZGU3In0.eyJhdWQiOiIzIiwianRpIjoiZWZjMWM5NzQ2YjVlYjA4OWNhMDU0MzZlY2U3ZDFlYTQwM2IwMWY1MjJmYmRjNjNjZTg5ZTliMTI3MWZhN2E1ZWI0N2Y1NGZmMGI5NDVkZTciLCJpYXQiOjE1MTc4MjUzODgsIm5iZiI6MTUxNzgyNTM4OCwiZXhwIjoxNTQ5MzYxMzg4LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.lnvquBEGB0g3-82ztA1iT4GthlXOyO5zX3qiW7iDT6D1cM15_Zn6slk1UOcHR1tsC406Px45eXvTZUjl3lW74Ynt11lCm7isygO-aQNweBA_Oyw_3ArcyjSvWmtEaYVVqAhivnNnJySJGMaUSVxNirPCTjagtcL31LIBR18IsUp9828-XvqGPwMk8jf0I2JHTPwVzCpeuFqQpvatkrJ_zJ4qPrvsWqMrX5tkPhuV9MhUKouiNLkbikbrjqC-43Inzs5nhoMhY2dssBj9rhfQUUyDip15-eWHNCFk_1SoSLl_lwa5R3gPMundtFdCMD_q4OdCrj5xzYt2gnsrh554tV-M3aYcqcphko6iQd_sq8d1Q4916iIn9tVa9IfWxSicyNCEglgJCaaZ9zrmeLeaSoqbhFjNpmQ_-3xlZUYY7nKhKET6_3PTulNgb7eeFHIi6Qe3bxJKDFZuSQ6CH3oZJcHNrX1XcQVOoqLthWqSBWRdbxLleVPjEMPnWBj7Y9CXDO_Dr8AcIrkrTl2-hjzrhFMfxjnxOinEMnXooMqucyTFt3BC1REyeUyvuJJudwUdHOqxPDJXVTEQo7G4J_tB5HwCt6moenCi8HG8TtsTnQUY477b_QjosQYZ2HJyG9RPBcmoxySaEj0YO5Hh8-mRI1BIRfrs21MIWjmnCscH5_c";
         string page;
         public ConnectServer(string _address)
         {
@@ -52,7 +52,7 @@ namespace UpDataCAD
         {
             Json json = new Json();
 
-            information = "'desktop':'386', 'name': 'Jan', 'lastname': 'Nowak', 'email':'jan.nowak@tgs.pl', 'phone':'626111221' 'department':'Ruda Śląska', 'file':'opoczno.exe', 'start':'21-01-2017 10:00:00', 'end':'21-01-2017 10:08:32'";
+            //information = "'desktop':'386', 'name': 'Jan', 'lastname': 'Nowak', 'email':'jan.nowak@tgs.pl', 'phone':'626111221' 'department':'Ruda Śląska', 'file':'opoczno.exe', 'start':'21-01-2017 10:00:00', 'end':'21-01-2017 10:08:32'";
 
             var jsonUser = JsonConvert.SerializeObject(information);
 
@@ -60,9 +60,22 @@ namespace UpDataCAD
 
             StringContent content = new StringContent(jsonUser, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await client.PostAsync(page + "api/user", content);
+            try
+            {
+               // HttpResponseMessage response = await client.PostAsync(page + "api/user", content);
+                HttpResponseMessage response =  client.PostAsync(page + "api/user", content).Result;
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception("Nie udało się nawiązać praidłowego połaczenia z serverem.");
+                }
+                var responseString = response.Content.ReadAsStringAsync().Result;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Nie udało się wysłać danych klienta: " + ex.Message);
+            }
 
-            var responseString = response.Content.ReadAsStringAsync().Result;
+            
         }
 
 

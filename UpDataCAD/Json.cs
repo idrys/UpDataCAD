@@ -131,7 +131,7 @@ namespace UpDataCAD
             UpdatePath item = jsonData.Find(s => s.ID == id.ToString());
             item.LocalPath = newData.LocalPath;
             item.Name = newData.Name;
-            item.Date = newData.Date;
+            item.Update_at = newData.Update_at;
             item.WebPath = newData.WebPath;
             item.ControllFile = newData.ControllFile;
         }
@@ -144,7 +144,7 @@ namespace UpDataCAD
         public void UpdateDate(int id, string date)
         {
             UpdatePath item = jsonData.Find(s => s.ID == id.ToString());
-            item.Date = date;
+            item.Update_at = date;
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace UpDataCAD
             {
                 //Debug.WriteLine(item.ID);
                 UpdatePath web = jsonToCheck.Find(s => s.ID == item.ID);
-                if (web.Date != item.Date)
+                if (web.Update_at != item.Update_at)
                     differences.Add(web);
 
             }
@@ -347,6 +347,9 @@ namespace UpDataCAD
             JsonSerializer serializer = new JsonSerializer();
             StreamReader reader = new StreamReader(s);
             string jsonString = reader.ReadToEnd();
+            UpdatePath up = new UpdatePath();
+            up.Path = "/code/test.zip";
+
             return JsonConvert.DeserializeObject<List<UpdatePath>>(jsonString);
             
         }

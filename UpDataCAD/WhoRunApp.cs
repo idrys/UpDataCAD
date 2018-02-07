@@ -26,9 +26,19 @@ namespace UpDataCAD
         Who who;
         string token;
         string page;
+        Dictionary<string, bool> isValidDict;
 
         public WhoRunApp()
         {
+            isValidDict = new Dictionary<string, bool>(){
+                { "department", false },
+                { "tboxName", false},
+                { "tboxLastName", false },
+                { "email", false },
+                { "phone", false }
+            };
+            
+
             page = "https://1sw.pl";
             token = ""; 
 
@@ -40,7 +50,7 @@ namespace UpDataCAD
             
         }
 
-       
+        
 
         private void btnOK_Click(object sender, EventArgs e)
         {
@@ -52,13 +62,20 @@ namespace UpDataCAD
             who.lastname = tboxLastName.Text;
             who.phone = maskTBoxPhone.Text; //masktBoxPhone.Text;
             who.email = tboxEmail.Text;
-            this.Close();
-            
-            tr = new Thread(OpenMainWindow);
-            tr.SetApartmentState(ApartmentState.STA);
-            tr.Start();
-            //Application.Run(new Form1(who));
 
+            if (IsAllValid())
+            {
+                this.Close();
+
+                tr = new Thread(OpenMainWindow);
+                tr.SetApartmentState(ApartmentState.STA);
+                tr.Start();
+                //Application.Run(new Form1(who));
+            }
+            else
+            {
+                MessageBox.Show("Proszę poprawić błędy w formularzu");
+            }
         }
 
         private void OpenMainWindow()
@@ -91,10 +108,17 @@ namespace UpDataCAD
 
         private void tboxEmail_Leave(object sender, EventArgs e)
         {
+            TextBox txtBox = sender as TextBox;
             if (IsValidEmail(tboxEmail.Text))
-                IsValid = true;
+            {
+                txtBox.BackColor = Color.White;
+                isValidDict["email"] = true;
+            }
             else
-                IsValid = false;
+            {
+                txtBox.BackColor = Color.Red;
+                isValidDict["email"] = false;
+            }
         }
 
         private void tboxName_Leave(object sender, EventArgs e)
@@ -127,21 +151,53 @@ namespace UpDataCAD
             }
         }
 
+        private void VaildateDepartment(object sender, EventArgs e)
+        {
+            ComboBox txtBox = sender as ComboBox;
+            
+            if (txtBox.Text.Length > 0)
+            {
+                txtBox.BackColor = Color.White;
+                isValidDict["department"] = true;
+            }
+            else
+            {
+                txtBox.BackColor = Color.Red;
+                isValidDict["department"] = false;
+            }
+        }
+
+        private void ValidatePhone(object sender, EventArgs e)
+        {
+            MaskedTextBox txtBox = sender as MaskedTextBox;
+            string strTmp = Regex.Replace(txtBox.Text, @"\s", "");
+            if (strTmp.Length == 12)
+            {
+                txtBox.BackColor = Color.White;
+                isValidDict["phone"] = true;
+            }
+            else
+            {
+                txtBox.BackColor = Color.Red;
+                isValidDict["phone"] = false;
+            }
+        }
+
         private void ValidateText(object sender, EventArgs e)
         {
             TextBox txtBox = sender as TextBox;
-            String strpattern = "[\\x20.a-zA-ZąćęłńóśźżĄĘŁŃÓŚŹŻ]"; //Pattern is Ok
+            String strpattern = "[\\x20.A-Za-ząćęłńóśźżĄĘŁŃÓŚŹŻ]"; //Pattern is Ok
             Regex regex = new Regex(strpattern);
             //What should I write here?
-            if (!regex.Match(txtBox.Text).Success)
+            if (!regex.Match(txtBox.Text).Success || txtBox.Text.Length < 3)
             {
                 txtBox.BackColor = Color.Red;
-                IsValid = true;
+                isValidDict[txtBox.Name] = false;
             }
             else
             {
                 txtBox.BackColor = Color.White;
-                IsValid = false;
+                isValidDict[txtBox.Name] = true;
             }
         }
 
@@ -166,7 +222,54 @@ namespace UpDataCAD
             public string department;        
         }
 
-       
+        /// <summary>
+        /// Sprawdzanie całego formularza
+        /// </summary>
+        /// <returns></returns>
+        private bool IsAllValid()
+        {          
+            foreach (var item in isValidDict)
+            {
+                if (!item.Value)
+                    return false;
+            }
+            return true;
+        }
+
+        private void WhoRunApp_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// Skrót klawiszowy Ctrl + F pozwalający ominąć okno Who
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="keyData"></param>
+        /// <returns></returns>
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Control | Keys.F))
+            {
+                who = new Who();
+                who.department = "Bytom";
+                who.name = "Jan";
+                who.lastname = "Testowy";
+                who.phone = "666777555";
+                who.email = "jan.testowy@tgs.pl";
+
+               
+                    this.Close();
+
+                    tr = new Thread(OpenMainWindow);
+                    tr.SetApartmentState(ApartmentState.STA);
+                    tr.Start();
+                   
+
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }
 
